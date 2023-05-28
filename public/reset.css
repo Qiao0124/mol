@@ -1,0 +1,55 @@
+:root{
+    --primary: #409EFF;
+    --primary-dark: #337ecc;
+    --red-dark:  #c45656;
+    --primary-light3: #79bbff;
+    --primary-light5:  #a0cfff;
+    --primary-light7: #c6e2ff;
+    --primary-light8:  #d9ecff;
+    --primary-light9:  #ecf5ff;
+    --swiper-theme-color: #007aff;
+    --swiper-navigation-size: 44px;
+
+    --nav-bg: #003366;
+}
+
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+    background-color: transparent;
+}
+::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+    background-color: #035de6;
+}
+::-webkit-scrollbar-track {
+    border-radius: 4px;
+    background-color: transparent;
+}
+html{
+    font-size: 16px;
+    font-family: Avenir, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-align: center;
+    color: #2c3e50;
+}
+body{
+    margin: 0;
+    padding: 0;
+}
+div{
+    transition: all 0.15s ease; 
+}
+span{
+    transition: all 0.15s ease; 
+}
+
+input, textarea, button {
+    border: none;
+    outline: none;
+  }
+
+button{
+    transition: all 0.15s ease; 
+}
