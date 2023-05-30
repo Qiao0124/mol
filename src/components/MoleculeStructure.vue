@@ -1,28 +1,34 @@
 <template>
   <p v-if="rdkitError">Error loading renderer</p>
 
-  <p v-if="!rdkitLoaded">Loading renderer</p>
+  <FadeTransition>
+    <div
+      v-if="!rdkitLoaded"
+      class="loading-icon"
+      :style="{ height: props.height + 'px', width: props.width + 'px' }"
+    ></div>
 
-  <span
-    v-else-if="!isValidMolString(structure)"
-    :title="`Cannot render structure: ${structure}`"
-  ></span>
+    <span
+      v-else-if="!isValidMolString(structure)"
+      :title="`Cannot render structure: ${structure}`"
+    ></span>
 
-  <div
-    v-else-if="svgMode"
-    :class="`molecule-structure-svg ${className}`"
-    :style="{ width: props.width, height: props.height }"
-    v-html="svg"
-  ></div>
+    <div
+      v-else-if="svgMode"
+      :class="`molecule-structure-svg ${className}`"
+      :style="{ width: props.width, height: props.height }"
+      v-html="svg"
+    ></div>
 
-  <div v-else :class="`molecule-canvas-container ${className}`">
-    <canvas
-      :title="structure"
-      :id="id"
-      :width="width"
-      :height="height"
-    ></canvas>
-  </div>
+    <div v-else :class="`molecule-canvas-container ${className}`">
+      <canvas
+        :title="structure"
+        :id="id"
+        :width="width"
+        :height="height"
+      ></canvas>
+    </div>
+  </FadeTransition>
 </template>
 
 <script setup lang="ts">
@@ -37,6 +43,7 @@ import {
 } from "vue";
 import { JSMol } from "@/utils/typescript";
 import initRDKit from "@/utils/initRDKit";
+import FadeTransition from "@/components/FadeTransition.vue";
 
 declare global {
   interface Global {
@@ -246,5 +253,33 @@ watch(props, () => draw());
   fill: transparent !important;
   width: 100%;
   height: 100%;
+}
+.loading-icon {
+  position: relative;
+}
+
+.loading-icon:before {
+  content: "";
+  box-sizing: border-box;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  margin-top: -20px;
+  margin-left: -20px;
+  border-radius: 50%;
+  border: 3px solid var(--primary-light7);
+  border-top-color: var(--primary-dark);
+  animation: spin 1s infinite linear;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

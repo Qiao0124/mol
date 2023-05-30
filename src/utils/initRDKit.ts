@@ -22,6 +22,7 @@ const initRDKit = (() => {
           .initRDKitModule()
           .then((RDKit) => {
             window.RDKit = RDKit;
+            console.log("window.RDKit", window.RDKit);
             resolve(RDKit);
           })
           .catch((e) => {
