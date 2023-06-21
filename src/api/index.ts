@@ -1,14 +1,19 @@
 import axios from "axios";
 import * as CONF from "@/openai-conf";
-import { ChatRecommendationM, MoleculeM } from "@/models";
+import { ChatRecommendationM, MoleculeM, SendMessageM } from "@/models";
 
-export async function reqSendMessage(message: string, context = []) {
+export async function reqSendMessage(
+  message: string,
+  chatId: number,
+  context = []
+): Promise<SendMessageM> {
   const url = "https://api.openai.com/v1/chat/completions";
   const data = {
     prompt: message,
     max_tokens: CONF.MAX_TOKENS, // 设置生成的回复长度
     temperature: CONF.TEMPERATURE, // 设置回复的创造性程度，值越大越创造性，但也会更加不确定
     context: context,
+    chatId: chatId,
   };
 
   const headers = {
@@ -27,6 +32,7 @@ export async function reqSendMessage(message: string, context = []) {
       isOk: true,
       newContext,
       reply,
+      chatId,
     };
   } catch (error) {
     console.error("Error:", error);

@@ -72,6 +72,7 @@ const sendMessage = async () => {
     id: Date.now(),
     text: inputText.value.trim(),
     role: "user",
+    chatId: 1,
   });
 
   inputText.value = "";
@@ -83,6 +84,7 @@ const sendMessage = async () => {
       id: Date.now(),
       text: "Molecular structure has been modified and rerendered",
       role: "bot",
+      chatId: 1,
     });
 
     isSending.value = false;
@@ -101,6 +103,7 @@ const sendMessage = async () => {
   //     id: Date.now(),
   //     text: reply,
   //     role: "bot",
+  //     chatId: 1,
   //   });
 
   //   isSending.value = false;

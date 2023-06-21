@@ -39,3 +39,11 @@ export interface ChatRecommendationM {
   isUser: boolean;
   context?: string[] | null;
 }
+
+// 发送对话后的响应模型
+export interface SendMessageM {
+  isOk: boolean;
+  newContext: [];
+  reply: string;
+  chatId: number;
+};
