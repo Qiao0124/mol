@@ -38,6 +38,7 @@ export async function reqSendMessage(
     console.error("Error:", error);
     return {
       isOk: false,
+      chatId,
       newContext: context,
       reply: "",
     };

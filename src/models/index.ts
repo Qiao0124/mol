@@ -43,7 +43,7 @@ export interface ChatRecommendationM {
 // 发送对话后的响应模型
 export interface SendMessageM {
   isOk: boolean;
-  newContext: [];
+  newContext: any[]; // context 类型未定
   reply: string;
   chatId: number;
 };
