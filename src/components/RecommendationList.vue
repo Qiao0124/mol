@@ -19,6 +19,10 @@
           />
           <img class="icon" src="@/assets/qms9.jpg" alt="" v-else />
           <div class="molecules2d-list" v-if="message">
+            <div class="bot-hint" v-if="!message.isUser">
+              Which ligands do you like or dislike? You need to mark your
+              preferences and submit them.
+            </div>
             <div
               class="molecules2d"
               v-for="(molecular, molIndex) in message.molecules"
@@ -37,24 +41,29 @@
                 <button
                   @click="methods.like(molecular, msgIndex, molIndex)"
                   class="like"
-                  :disabled="molecular.isLiked"
+                  :disabled="molecular.isLiked || molecular.isSubmited"
                 >
                   <img src="@/assets/like.svg" alt="" />
                 </button>
                 <button
                   @click="methods.dislike(molecular, msgIndex, molIndex)"
                   class="dislike"
-                  :disabled="molecular.isDisliked"
+                  :disabled="molecular.isDisliked || molecular.isSubmited"
                 >
                   <img src="@/assets/dislike.svg" alt="" />
                 </button>
                 <button @click="methods.preview(molecular)">
                   <img src="@/assets/preview.svg" alt="" />
                 </button>
-                <button @click="methods.selectMolecule(molecular)">
+                <!-- <button @click="methods.selectMolecule(molecular)">
                   <img src="@/assets/select.svg" alt="" />
-                </button>
+                </button> -->
               </div>
+            </div>
+            <div class="preferences-submit-btn" v-if="!message.isUser">
+              <button @click="methods.submitPreferrnce(msgIndex)">
+                Submit
+              </button>
             </div>
           </div>
         </div>
@@ -81,14 +90,16 @@ interface stateM {
   likedMolecules: MoleculeM[];
   dislikedMolecules: MoleculeM[];
   likedMoleculeIds: number[];
+  dislikedMoleculeIds: number[];
   messages: ChatRecommendationM[];
 }
 
 const state: stateM = reactive({
   molecules: [],
   likedMolecules: [],
-  dislikedMolecules: [],
   likedMoleculeIds: [],
+  dislikedMolecules: [],
+  dislikedMoleculeIds: [],
   messages: [],
 });
 
@@ -120,6 +131,12 @@ const methods = reactive({
     );
     state.dislikedMolecules.push(molecule);
   },
+  async submitPreferrnce(msgIndex: number) {
+    state.messages[msgIndex].molecules.forEach((molecule) => {
+      molecule.isSubmited = true;
+    });
+    await sendMessage();
+  },
   async clear() {
     state.messages = [];
     const moleculesRecommend: ChatRecommendationM = await reqMolecularRecommend(
@@ -144,7 +161,8 @@ const sendMessage = async () => {
   // TODO: send message to openai server ( mock )
   setTimeout(async () => {
     const moleculesRecommend: ChatRecommendationM = await reqMolecularRecommend(
-      state.likedMoleculeIds
+      state.likedMoleculeIds,
+      state.dislikedMoleculeIds
     );
     state.molecules = moleculesRecommend.molecules;
     state.messages.push(moleculesRecommend);
@@ -156,6 +174,7 @@ const sendMessage = async () => {
   state.likedMolecules = [];
   state.likedMoleculeIds = [];
   state.dislikedMolecules = [];
+  state.dislikedMoleculeIds = [];
 
   // TODO: send message to openai server (Comment out the code for the mock before using the following code)
   // let { isOk, newContext, reply } = await reqSendMessage(
@@ -196,17 +215,17 @@ watch(state.messages, () => {
 });
 
 // when all molecules are liked or disliked, send message to openai server
-watch(
-  () => state.likedMolecules.length + state.dislikedMolecules.length,
-  () => {
-    if (
-      state.likedMolecules.length + state.dislikedMolecules.length ===
-      state.molecules.length
-    ) {
-      sendMessage();
-    }
-  }
-);
+// watch(
+//   () => state.likedMolecules.length + state.dislikedMolecules.length,
+//   () => {
+//     if (
+//       state.likedMolecules.length + state.dislikedMolecules.length ===
+//       state.molecules.length
+//     ) {
+//       sendMessage();
+//     }
+//   }
+// );
 </script>
 
 <style lang="scss" scoped>
@@ -320,6 +339,39 @@ watch(
                 &:hover {
                   background: var(--red-dark);
                 }
+              }
+            }
+          }
+          .preferences-submit-btn {
+            width: 100%;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            button {
+              box-sizing: border-box;
+              padding: 3px;
+              width: 80px;
+              height: 25px;
+              color: white;
+              background: var(--primary);
+              border-radius: 5px;
+              font-weight: bold;
+              transition: background 0.3s;
+              cursor: pointer;
+              &:hover {
+                background: var(--primary-dark);
+              }
+              &:disabled {
+                background: #ddd;
+                cursor: not-allowed;
+                &:hover {
+                  background: #ddd;
+                }
+              }
+              img {
+                width: 100%;
+                height: 100%;
               }
             }
           }

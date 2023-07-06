@@ -29,6 +29,7 @@ export interface MoleculeM {
   name: string;
   isLiked: boolean;
   isDisliked: boolean;
+  isSubmited: boolean; // 在分子推送中，用户是否已经提交了偏好反馈
   statisticsIndexs: statisticsIndexsM;
 }
 

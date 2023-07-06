@@ -47,6 +47,7 @@ export async function reqSendMessage(
 
 export async function reqMolecularRecommend(
   likedMolecularIds: number[] = [],
+  dislikedMolecularIds: number[] = [],
   messageId: number | null = null
 ): Promise<ChatRecommendationM> {
   // TODO: 请在此处实现分子推荐的请求
@@ -315,6 +316,7 @@ export async function reqMolecularRecommend(
           statisticsIndexs: molecule.statistics_before,
           isLiked: false,
           isDisliked: false,
+          isSubmited: false,
         };
         console.log("resMolecule", resMolecule);
         res.push(resMolecule);

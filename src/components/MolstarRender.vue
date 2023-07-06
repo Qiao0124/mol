@@ -1,5 +1,6 @@
 <template>
   <div id='_molstar-parent'>
+    <div class="2d-screenshot"></div>
     <canvas id='molstar-canvas'></canvas>
   </div>
 </template>
@@ -9,6 +10,8 @@ import { ref, onMounted, watch } from "vue";
 import { DefaultPluginSpec, PluginSpec } from "molstar/lib/mol-plugin/spec";
 import { PluginContext } from "molstar/lib/mol-plugin/context";
 import { PluginConfig } from "molstar/lib/mol-plugin/config";
+import { ColorNames } from 'molstar/lib/mol-util/color/names';
+import { PluginCommands } from 'molstar/lib/mol-plugin/commands';
 
 let viewerRef = ref();
 const options = {
@@ -95,6 +98,6 @@ watch(
 }
 #molstar-canvas {
   width: 100%;
-  fill: white;
+  fill: black;
 }
 </style>
