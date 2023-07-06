@@ -41,6 +41,7 @@
                 <button
                   @click="methods.like(molecular, msgIndex, molIndex)"
                   class="like"
+                  :class="molecular.isLiked ? 'isLiked' : ''"
                   :disabled="molecular.isLiked || molecular.isSubmited"
                 >
                   <img src="@/assets/like.svg" alt="" />
@@ -48,6 +49,7 @@
                 <button
                   @click="methods.dislike(molecular, msgIndex, molIndex)"
                   class="dislike"
+                  :class="molecular.isDisliked ? 'isDisliked' : ''"
                   :disabled="molecular.isDisliked || molecular.isSubmited"
                 >
                   <img src="@/assets/dislike.svg" alt="" />
@@ -331,13 +333,29 @@ watch(state.messages, () => {
               .like {
                 background-color: #fde2e2;
                 &:hover {
-                  background: var(--red-dark);
+                  background: var(--red);
+                }
+                &.isLiked {
+                  &:disabled {
+                    background: var(--red-dark);
+                    &:hover {
+                      background: var(--red-dark);
+                    }
+                  }
                 }
               }
               .dislike {
                 background-color: #fde2e2;
                 &:hover {
-                  background: var(--red-dark);
+                  background: var(--red);
+                }
+                &.isDisliked {
+                  &:disabled {
+                    background: var(--red-dark);
+                    &:hover {
+                      background: var(--red-dark);
+                    }
+                  }
                 }
               }
             }

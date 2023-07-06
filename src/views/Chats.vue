@@ -18,7 +18,10 @@
     </div>
     <div class="main-right render-area">
       <div class="pre-view render-view" v-if="state.inPreview.showing">
-        <MolstarRender :url="currentPreviewUrl" />
+        <MolstarRender
+          :url="currentPreviewUrl"
+          :smiles="state.inPreview.previewMolecule.smiles"
+        />
         <div class="statistics-indexs">
           <StatisticsIndexs
             v-for="(statistic, key, index) in state.inPreview.previewMolecule.statisticsIndexs"
@@ -29,7 +32,10 @@
         </div>
       </div>
       <div class="formal-view render-view" v-else-if="state.inFormal.showing">
-        <MolstarRender :url="currentFormalUrl" />
+        <MolstarRender
+          :url="currentFormalUrl"
+          :smiles="state.inPreview.previewMolecule.smiles"
+        />
         <div class="statistics-indexs">
           <StatisticsIndexs
             v-for="(statistic, key, index) in currentFormalStatisticsIndexs"

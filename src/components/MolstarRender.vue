@@ -1,6 +1,14 @@
 <template>
   <div id='_molstar-parent'>
-    <div class="2d-screenshot"></div>
+    <div class="screenshot">
+      <MoleculeStructure
+        :id="'screenshot'"
+        :structure="props.smiles"
+        :width="160"
+        :height="160"
+        :svgMode="true"
+      />
+    </div>
     <canvas id='molstar-canvas'></canvas>
   </div>
 </template>
@@ -12,6 +20,7 @@ import { PluginContext } from "molstar/lib/mol-plugin/context";
 import { PluginConfig } from "molstar/lib/mol-plugin/config";
 import { ColorNames } from 'molstar/lib/mol-util/color/names';
 import { PluginCommands } from 'molstar/lib/mol-plugin/commands';
+import MoleculeStructure from "./MoleculeStructure.vue";
 
 let viewerRef = ref();
 const options = {
@@ -33,6 +42,10 @@ const props = defineProps({
   url: {
     type: String,
     default: "http://localhost:8080/examples/before_add_0.sdf",
+  },
+  smiles: {
+    type: String,
+    default: "C1=CC=C(C=C1)C(=O)O",
   },
 });
 
@@ -99,5 +112,8 @@ watch(
 #molstar-canvas {
   width: 100%;
   fill: black;
+}
+.screenshot {
+  position: absolute;
 }
 </style>

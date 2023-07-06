@@ -88,6 +88,7 @@ const props = defineProps({
   },
   extraDetails: {
     type: Object,
+    // eslint-disable-next-line vue/require-valid-default-prop
     default: {},
   },
   drawingDelay: {
