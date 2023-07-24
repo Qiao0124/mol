@@ -51,6 +51,14 @@ input, textarea, button {
     outline: none;
   }
 
-button{
+button {
     transition: all 0.15s ease; 
+    padding: 5px 10px;
+    border-radius: 5px;
+    background: #eee;
+    cursor: pointer;
+    
 }
+button:hover {
+    background: #ddd;
+  }

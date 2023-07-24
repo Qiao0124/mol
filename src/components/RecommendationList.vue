@@ -18,7 +18,7 @@
             v-if="message.isUser"
           />
           <img class="icon" src="@/assets/qms9.jpg" alt="" v-else />
-          <div class="molecules2d-list" v-if="message">
+          <div class="molecules2d-list" v-if="message && !message.isUser">
             <div class="bot-hint" v-if="!message.isUser">
               Which ligands do you like or dislike? You need to mark your
               preferences and submit them.
@@ -32,12 +32,12 @@
                 <MoleculeStructure
                   :id="String(molecular.id)"
                   :structure="molecular.smiles"
-                  :width="160"
-                  :height="160"
+                  :width="130"
+                  :height="130"
                   :svgMode="true"
                 />
               </div>
-              <div class="btns" v-if="!message.isUser">
+              <div class="btns">
                 <button
                   @click="methods.like(molecular, msgIndex, molIndex)"
                   class="like"
@@ -62,10 +62,47 @@
                 </button> -->
               </div>
             </div>
-            <div class="preferences-submit-btn" v-if="!message.isUser">
-              <button @click="methods.submitPreferrnce(msgIndex)">
+            <div class="preferences-submit-btn">
+              <button
+                @click="methods.submitPreferrnce(msgIndex)"
+                :disabled="!message.canSubmit"
+              >
                 Submit
               </button>
+            </div>
+          </div>
+          <div class="molecules2d-list" v-else-if="message && message.isUser">
+            <div class="user-hint">You like the following molecules.</div>
+            <div
+              class="molecules2d"
+              v-for="molecular in message.likedMolecules"
+              :key="molecular.id"
+            >
+              <div class="molecules2d-svg">
+                <MoleculeStructure
+                  :id="String(molecular.id)"
+                  :structure="molecular.smiles"
+                  :width="130"
+                  :height="130"
+                  :svgMode="true"
+                />
+              </div>
+            </div>
+            <div class="user-hint">You dislike the following molecules.</div>
+            <div
+              class="molecules2d"
+              v-for="molecular in message.dislikedMolecules"
+              :key="molecular.id"
+            >
+              <div class="molecules2d-svg">
+                <MoleculeStructure
+                  :id="String(molecular.id)"
+                  :structure="molecular.smiles"
+                  :width="130"
+                  :height="130"
+                  :svgMode="true"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -77,7 +114,7 @@
 <script lang="ts" setup>
 import { reqMolecularRecommend } from "@/api";
 import { MoleculeM, ChatRecommendationM } from "@/models";
-import { reactive, onMounted, ref, watch } from "vue";
+import { reactive, onMounted, ref, watch, defineEmits } from "vue";
 import MoleculeStructure from "./MoleculeStructure.vue";
 
 const emit = defineEmits(["click-to-select", "click-to-preview"]);
@@ -134,6 +171,7 @@ const methods = reactive({
     state.dislikedMolecules.push(molecule);
   },
   async submitPreferrnce(msgIndex: number) {
+    state.messages[msgIndex].canSubmit = false;
     state.messages[msgIndex].molecules.forEach((molecule) => {
       molecule.isSubmited = true;
     });
@@ -155,6 +193,9 @@ const sendMessage = async () => {
     id: Date.now(),
     isUser: true,
     molecules: state.likedMolecules,
+    likedMolecules: state.likedMolecules,
+    dislikedMolecules: state.dislikedMolecules,
+    canSubmit: false,
   });
 
   inputText.value = "";
@@ -293,10 +334,24 @@ watch(state.messages, () => {
           text-align: start;
           word-wrap: break-word;
           overflow-wrap: break-word;
+          .user-hint {
+            width: 100%;
+          }
+          .bot-hint {
+            width: 100%;
+          }
           .molecules2d {
+            position: relative;
+            width: 130px;
+            height: 160px;
             margin: 2px;
             border: 0.5px solid #ddd;
             border-radius: 12px;
+            .molecules2d-svg {
+              position: relative;
+              width: 100%;
+              height: calc(100% - 30px);
+            }
             .btns {
               width: 100%;
               height: 30px;

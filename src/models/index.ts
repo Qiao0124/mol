@@ -26,6 +26,9 @@ export interface ChatMessageM {
 export interface MoleculeM {
   id: number;
   smiles: string;
+  url: string;
+  type: string;
+  pdbId?: number; // 对应咬合的蛋白质的Id
   name: string;
   isLiked: boolean;
   isDisliked: boolean;
@@ -36,6 +39,9 @@ export interface MoleculeM {
 export interface ChatRecommendationM {
   id: number;
   molecules: MoleculeM[];
+  likedMolecules: MoleculeM[]; // 用于 isUser == true
+  dislikedMolecules: MoleculeM[]; // 用于 isUser == true
+  canSubmit: boolean;
   replyId?: number | null;
   isUser: boolean;
   context?: string[] | null;
@@ -47,4 +53,4 @@ export interface SendMessageM {
   newContext: any[]; // context 类型未定
   reply: string;
   chatId: number;
-};
+}

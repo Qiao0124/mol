@@ -1,5 +1,5 @@
 <template>
-  <svg width="160" height="160" :id="props.type"></svg>
+  <svg width="120" height="120" :id="props.type"></svg>
 </template>
 
 <script lang="ts" setup>
@@ -68,10 +68,10 @@ function getLabel() {
 
 function draw() {
   let tau = 2 * Math.PI;
-  let width = 160;
-  let height = 160;
+  let width = 120;
+  let height = 120;
 
-  let arc = d3.arc().innerRadius(72).outerRadius(80).startAngle(0);
+  let arc = d3.arc().innerRadius(50).outerRadius(45).startAngle(0);
 
   let svg = d3.select(`#${props.type}`);
   let g = svg
@@ -100,7 +100,7 @@ function draw() {
     .attr("dy", "0em")
     .attr("fill", "#000")
     .attr("color", "#000")
-    .attr("font-size", "12px")
+    .attr("font-size", "10px")
     .attr("font-weight", "bold")
     .attr("font-family", "sans-serif")
     .style("cursor", "pointer")
@@ -118,7 +118,7 @@ function draw() {
     .attr("dy", "1.5em")
     .attr("fill", "#000")
     .attr("color", "#000")
-    .attr("font-size", "12px")
+    .attr("font-size", "10px")
     .attr("font-weight", "bold")
     .attr("font-family", "sans-serif")
     .style("cursor", "pointer")
@@ -167,7 +167,7 @@ watch(
 
 <style lang="scss" scoped>
 svg {
-  margin: 16px;
+  margin: 12px;
   background: white;
 }
 </style>

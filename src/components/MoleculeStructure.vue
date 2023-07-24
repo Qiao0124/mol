@@ -237,7 +237,7 @@ onMounted(() => {
  */
 
 onUpdated(() => {
-  if (!rdkitError && rdkitLoaded && !props.svgMode) {
+  if (!rdkitError.value && rdkitLoaded && !props.svgMode) {
     drawOnce();
   }
 });

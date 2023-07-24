@@ -1,9 +1,19 @@
+<!-- eslint-disable prettier/prettier -->
 <template>
   <div class="_chats">
     <div class="chats-history">
       <ChatsHistory />
     </div>
-    <div class="main-left recommendations" v-if="!state.inFormal.showing">
+    <div
+      class="main-left pdf-select-or-upload"
+      v-if="state.inPdbSelect.showing"
+    >
+      <PdbSeletcOrUpload
+        @pdb-selected="selectPdb"
+        @pdb-uploaded="uploadPdb"
+      />
+    </div>
+    <div class="main-left recommendations" v-else-if="!state.inFormal.showing">
       <RecommendationList
         @click-to-select="selectMolecule"
         @click-to-preview="previewMolecule"
@@ -18,13 +28,15 @@
     </div>
     <div class="main-right render-area">
       <div class="pre-view render-view" v-if="state.inPreview.showing">
-        <MolstarRender
-          :url="currentPreviewUrl"
+        <MolstarRender2
+          :url="state.inPreview.previewMolecule.url"
           :smiles="state.inPreview.previewMolecule.smiles"
+          @click-rerender-pdb="rerenderPdb"
         />
         <div class="statistics-indexs">
           <StatisticsIndexs
-            v-for="(statistic, key, index) in state.inPreview.previewMolecule.statisticsIndexs"
+            v-for="(statistic, key, index) in state.inPreview.previewMolecule
+              .statisticsIndexs"
             :key="index"
             :type="key"
             :value="statistic"
@@ -54,9 +66,11 @@
 
 <script lang="ts" setup>
 import MolstarRender from "@/components/MolstarRender.vue";
+import MolstarRender2 from "@/components/MolstarRender2.vue";
 import RecommendationList from "@/components/RecommendationList.vue";
+import PdbSeletcOrUpload from "@/components/PdbSeletcOrUpload.vue";
 import StatisticsIndexs from "@/components/StatisticsIndexs.vue";
-import { ref, onMounted, watch, reactive, computed } from "vue";
+import { ref, onMounted, watch, reactive, computed, nextTick } from "vue";
 import { MoleculeM, ChatRecommendationM } from "@/models";
 import DialogBox from "@/components/DialogBox.vue";
 import ChatsHistory from "@/components/ChatsHistory.vue";
@@ -64,12 +78,17 @@ import ChatsHistory from "@/components/ChatsHistory.vue";
 interface stateM {
   inPreview: {
     showing: boolean;
-    previewMolecule: MoleculeM;
+    previewMolecule: MoleculeM; // pdb 或 sdf
+    previewPdb: MoleculeM; // pdb
+    currentPdbUrl: string;
   };
   inFormal: {
     showing: boolean;
     formalMolecule: MoleculeM;
     isModified: boolean;
+  };
+  inPdbSelect: {
+    showing: boolean;
   };
 }
 
@@ -77,15 +96,36 @@ const state: stateM = reactive({
   inPreview: {
     showing: false,
     previewMolecule: {} as MoleculeM,
+    previewPdb: {} as MoleculeM,
+    currentPdbUrl: "",
   },
   inFormal: {
     showing: false,
     formalMolecule: {} as MoleculeM,
     isModified: false,
   },
+  inPdbSelect: {
+    showing: true,
+  },
 });
 
-const selectMolecule = (molecule: MoleculeM) => {
+const selectPdb = (mol: MoleculeM) => {
+  state.inPdbSelect.showing = false;
+  state.inFormal.showing = false;
+  state.inPreview.previewMolecule = mol;
+  state.inPreview.previewPdb = mol;
+  state.inPreview.currentPdbUrl = mol.url;
+  state.inPreview.showing = true;
+};
+
+const rerenderPdb = async () => {
+  state.inPreview.showing = false;
+  await nextTick();
+  state.inPreview.previewMolecule = state.inPreview.previewPdb;
+  state.inPreview.showing = true;
+};
+
+const uploadPdb = (molecule: MoleculeM) => {
   state.inFormal.formalMolecule = molecule;
   state.inFormal.showing = true;
   state.inPreview.showing = false;
@@ -148,6 +188,11 @@ const currentFormalStatisticsIndexs = computed(() => {
   display: flex;
   width: 100%;
   height: 100%;
+  .pdb-select-or-upload {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+  }
   .chats-history {
     display: flex;
     align-items: center;
@@ -156,12 +201,12 @@ const currentFormalStatisticsIndexs = computed(() => {
     height: 100%;
   }
   .main-left {
-    width: 750px;
+    width: 900px;
     height: 100%;
     background-color: white;
   }
   .main-right {
-    width: calc(100% - 942px);
+    width: calc(100% - 1092px);
     height: 100%;
     overflow-y: auto;
     .render-view {

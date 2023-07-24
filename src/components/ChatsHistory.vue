@@ -4,7 +4,7 @@
     <div class="chats-list">
       <div class="chats-list-item">
         <div class="item-icon">
-          <img src="@/assets/qms10.jpg" alt="">
+          <img src="@/assets/qms10.jpg" alt="" />
         </div>
         <div class="item-title">
           <div class="title">Expert</div>
