@@ -1,173 +1,293 @@
 <template>
-  <svg width="120" height="120" :id="props.type"></svg>
+  <div class="_statistics-index">
+    <div class="norange-list"></div>
+    <div class="range-list">
+      <div class="Vina range" id="Vina"></div>
+      <div class="Lipinski range" id="Lipinski"></div>
+      <div class="QED range" id="QED"></div>
+      <div class="SA range" id="SA"></div>
+      <div class="num_atoms range" id="num_atoms"></div>
+      <div class="num_bonds range" id="num_bonds"></div>
+      <div class="num_rings range" id="num_rings"></div>
+      <div class="num_benzene_rings range" id="num_benzene_rings"></div>
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
-//@ts-nocheck
-import * as d3 from "d3";
-import { ref, onMounted, defineProps, watch } from "vue";
-// 在setup函数中可以使用D3库
+import * as echarts from "echarts";
+import { ref, onMounted, defineProps, watch, reactive } from "vue";
+import { statisticsIndexsM } from "@/models";
+import * as api from "@/api";
+
 const chartContainer = ref(null);
-const props = defineProps(["type", "value"]);
+const props = defineProps<{ statisticsUrl?: string }>();
+const state = reactive({
+  statistics: {
+    num_atoms: 0,
+    num_bonds: 0,
+    num_rings: 0,
+    num_benzene_rings: 0,
+    Vina: 0,
+    Lipinski: 0,
+    QED: 0,
+    SA: 0,
+  },
+});
 
-function getMaximum(isOriginal: boolean) {
-  switch (props.type) {
+function getMaximum(label: string) {
+  switch (label) {
     case "num_atoms":
-      return (Math.round(props.value / 100) + 1) * 100;
+      return (Math.floor(state.statistics.num_atoms / 50) + 1) * 50;
     case "num_bonds":
-      return (Math.round(props.value / 100) + 1) * 100;
+      return (Math.floor(state.statistics.num_bonds / 50) + 1) * 50;
     case "num_rings":
-      return (Math.round(props.value / 100) + 1) * 100;
-    case "num_H_donors":
-      return (Math.round(props.value / 100) + 1) * 100;
-    case "num_H_acceptors":
-      return (Math.round(props.value / 100) + 1) * 100;
-    case "num_rotatable_bonds":
-      return (Math.round(props.value / 100) + 1) * 100;
+      return (Math.floor(state.statistics.num_rings / 50) + 1) * 50;
+    case "num_benzene_rings":
+      return (Math.floor(state.statistics.num_benzene_rings / 50) + 1) * 50;
     case "QED":
       return 1;
     case "SA":
       return 1;
-    case "LogP":
-      return isOriginal ? 5 : 8;
+    case "Vina":
+      return 5;
+    case "Lipinski":
+      return 5;
+    default:
+      return 1;
   }
 }
 
-function getValue(isOriginal: boolean) {
-  if (props.type == "LogP") {
-    return isOriginal
-      ? Number(props.value).toFixed(3)
-      : Number(props.value + 3).toFixed(3);
+function checkIfShowRange(label: string) {
+  if (
+    label == "num_atoms" ||
+    label == "num_bonds" ||
+    label == "num_rings" ||
+    label == "num_benzene_rings" ||
+    label == "Vina"
+  ) {
+    return false;
   } else {
-    return Number(props.value).toFixed(3);
+    return true;
   }
 }
 
-function getLabel() {
-  switch (props.type) {
-    case "num_atoms":
-      return "Atoms Num";
-    case "num_bonds":
-      return "Bonds Num";
-    case "num_rings":
-      return "Rings Num";
-    case "num_H_donors":
-      return "H Donors Num";
-    case "num_H_acceptors":
-      return "H Acceptors Num";
-    case "num_rotatable_bonds":
-      return "Rotatable Bonds Num";
-    case "QED":
-      return "QED";
-    case "SA":
-      return "SA";
-    case "LogP":
-      return "LogP";
-  }
+function drawRange(
+  domId: string,
+  value: number,
+  minVal: number,
+  maxVal: number,
+  label: string
+) {
+  const chartDom = document.getElementById(domId);
+  chartDom?.removeAttribute("_echarts_instance_");
+  const myChart = echarts.init(chartDom);
+  const option = {
+    series: [
+      {
+        type: "gauge",
+        min: minVal,
+        max: maxVal,
+        progress: {
+          show: true,
+          width: 5,
+        },
+        axisLine: {
+          lineStyle: {
+            width: 5,
+          },
+        },
+        axisTick: {
+          show: false,
+        },
+        splitLine: {
+          length: 6,
+          lineStyle: {
+            width: 1,
+            color: "#999",
+          },
+        },
+        axisLabel: {
+          distance: 7,
+          color: "#999",
+          fontSize: 8,
+        },
+        anchor: {
+          show: true,
+          showAbove: true,
+          size: 10,
+          itemStyle: {
+            borderWidth: 3,
+          },
+        },
+        title: {
+          show: true,
+          offsetCenter: [0, "90%"],
+          fontSize: 12,
+        },
+        detail: {
+          valueAnimation: true,
+          fontSize: 16,
+          offsetCenter: [0, "58%"],
+        },
+        data: [
+          {
+            value: value,
+            name: label,
+          },
+        ],
+      },
+    ],
+  };
+
+  option && myChart.setOption(option);
 }
 
-function draw() {
-  let tau = 2 * Math.PI;
-  let width = 120;
-  let height = 120;
-
-  let arc = d3.arc().innerRadius(50).outerRadius(45).startAngle(0);
-
-  let svg = d3.select(`#${props.type}`);
-  let g = svg
-    .append("g")
-    .attr("transform", `translate(${width / 2}, ${height / 2})`);
-
-  // Add the background arc, from 0 to 100% (tau).
-  let background = g
-    .append("path")
-    .datum({ endAngle: tau })
-    .style("fill", "#ddd")
-    .attr("d", arc);
-
-  // Set foreground arc to 0% to begin with.
-  let foreground = g
-    .append("path")
-    .datum({ endAngle: 0 })
-    .style("fill", "#409EFF")
-    .style("cursor", "pointer")
-    .attr("d", (d) => arc(d));
-
-  // add text label on the bottom
-  let txt1 = g
-    .append("text")
-    .attr("text-anchor", "middle")
-    .attr("dy", "0em")
-    .attr("fill", "#000")
-    .attr("color", "#000")
-    .attr("font-size", "10px")
-    .attr("font-weight", "bold")
-    .attr("font-family", "sans-serif")
-    .style("cursor", "pointer")
-    .on("mouseover", function () {
-      foreground.style("fill", "#337ecc");
-    })
-    .on("mouseout", function () {
-      foreground.style("fill", "#409EFF");
-    })
-    .text(getLabel());
-
-  let txt2 = g
-    .append("text")
-    .attr("text-anchor", "middle")
-    .attr("dy", "1.5em")
-    .attr("fill", "#000")
-    .attr("color", "#000")
-    .attr("font-size", "10px")
-    .attr("font-weight", "bold")
-    .attr("font-family", "sans-serif")
-    .style("cursor", "pointer")
-    .on("mouseover", function () {
-      foreground.style("fill", "#337ecc");
-    })
-    .on("mouseout", function () {
-      foreground.style("fill", "#409EFF");
-    })
-    .text(getValue(true) + "/" + getMaximum(true));
-
-  foreground
-    .transition()
-    .duration(1250)
-    .attrTween("d", arcTween((getValue() / getMaximum(false)) * tau));
-
-  foreground
-    .on("mouseover", function () {
-      d3.select(this).style("fill", "#337ecc");
-    })
-    .on("mouseout", function () {
-      d3.select(this).style("fill", "#409EFF");
-    });
-
-  function arcTween(newAngle) {
-    return (d) => {
-      let interpolate = d3.interpolate(d.endAngle, newAngle);
-
-      return (t) => ((d.endAngle = interpolate(t)), arc(d));
-    };
-  }
-}
-
-onMounted(() => {
-  draw();
+onMounted(async () => {
+  if (!props.statisticsUrl) return;
+  state.statistics = await api.reqGetStatistics(props.statisticsUrl);
+  drawRange(
+    "num_atoms",
+    Number(state.statistics.num_atoms.toFixed(3)),
+    0,
+    getMaximum("num_atoms"),
+    "Atoms Num"
+  );
+  drawRange(
+    "num_bonds",
+    Number(state.statistics.num_bonds.toFixed(3)),
+    0,
+    getMaximum("num_bonds"),
+    "Bonds Num"
+  );
+  drawRange(
+    "num_rings",
+    Number(state.statistics.num_rings.toFixed(3)),
+    0,
+    getMaximum("num_rings"),
+    "Rings Num"
+  );
+  drawRange(
+    "num_benzene_rings",
+    Number(state.statistics.num_benzene_rings.toFixed(3)),
+    0,
+    getMaximum("num_benzene_rings"),
+    "Benzene Rings Num"
+  );
+  drawRange(
+    "Vina",
+    Number(state.statistics.Vina.toFixed(3)),
+    -20,
+    getMaximum("Vina"),
+    "Vina Score"
+  );
+  drawRange(
+    "Lipinski",
+    Number(state.statistics.Lipinski.toFixed(3)),
+    0,
+    getMaximum("Lipinski"),
+    "Lipinski"
+  );
+  drawRange(
+    "QED",
+    Number(state.statistics.QED.toFixed(3)),
+    0,
+    getMaximum("QED"),
+    "QED"
+  );
+  drawRange(
+    "SA",
+    Number(state.statistics.SA.toFixed(3)),
+    0,
+    getMaximum("SA"),
+    "SA"
+  );
 });
 
 watch(
-  () => props.value,
-  () => {
-    d3.select(`#${props.type}`).selectAll("*").remove();
-    draw();
+  () => props.statisticsUrl,
+  async () => {
+    if (!props.statisticsUrl) return;
+    state.statistics = await api.reqGetStatistics(props.statisticsUrl);
+    console.log(state.statistics);
+    drawRange(
+      "num_atoms",
+      Number(state.statistics.num_atoms.toFixed(3)),
+      0,
+      getMaximum("num_atoms"),
+      "Atoms Num"
+    );
+    drawRange(
+      "num_bonds",
+      Number(state.statistics.num_bonds.toFixed(3)),
+      0,
+      getMaximum("num_bonds"),
+      "Bonds Num"
+    );
+    drawRange(
+      "num_rings",
+      Number(state.statistics.num_rings.toFixed(3)),
+      0,
+      getMaximum("num_rings"),
+      "Rings Num"
+    );
+    drawRange(
+      "num_benzene_rings",
+      Number(state.statistics.num_benzene_rings.toFixed(3)),
+      0,
+      getMaximum("num_benzene_rings"),
+      "Benzene Rings Num"
+    );
+    drawRange(
+      "Vina",
+      Number(state.statistics.Vina.toFixed(3)),
+      -20,
+      getMaximum("Vina"),
+      "Vina Score"
+    );
+    drawRange(
+      "Lipinski",
+      Number(state.statistics.Lipinski.toFixed(3)),
+      0,
+      getMaximum("Lipinski"),
+      "Lipinski"
+    );
+    drawRange(
+      "QED",
+      Number(state.statistics.QED.toFixed(3)),
+      0,
+      getMaximum("QED"),
+      "QED"
+    );
+    drawRange(
+      "SA",
+      Number(state.statistics.SA.toFixed(3)),
+      0,
+      getMaximum("SA"),
+      "SA"
+    );
   }
 );
 </script>
 
 <style lang="scss" scoped>
-svg {
-  margin: 12px;
-  background: white;
+._statistics-index {
+  box-sizing: border-box;
+  position: relative;
+  .norange {
+    width: 100%;
+    height: 30px;
+  }
+  .range-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    .range {
+      width: 172px;
+      height: 185px;
+      background: white;
+    }
+  }
 }
 </style>

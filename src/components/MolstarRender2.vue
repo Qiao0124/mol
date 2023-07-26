@@ -1,6 +1,8 @@
 <template>
-  <div class="_molstar-render" ref="_molstarRender"></div>
-  <button @click="clearAllSdfs">Clear all sdfs</button>
+  <div class="_molstar-render" >
+    <div class="canvas-render" ref="_molstarRender"></div>
+    <button class="clear-sdfs" @click="clearAllSdfs">Clear all sdfs</button>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -158,8 +160,19 @@ watch(
   position: relative;
   width: 100%;
   height: 100%;
-  .msp-plugin-content {
+  .canvas-render {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    .msp-plugin-content {
+      position: absolute;
+    }
+  }
+  .clear-sdfs {
     position: absolute;
+    bottom: 10px;
+    right: 5%;
+    z-index: 1;
   }
 }
 </style>

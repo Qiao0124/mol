@@ -1,0 +1,8 @@
+Vina score: -7.1
+QED: 0.73
+SA: 0.69
+Lipinski: 5
+Atoms Num: 22
+Bonds Num: 22
+Rings Num: 1
+Benzene Rings Num: 0

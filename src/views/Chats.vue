@@ -28,18 +28,16 @@
     </div>
     <div class="main-right render-area">
       <div class="pre-view render-view" v-if="state.inPreview.showing">
-        <MolstarRender2
+        <div class="renderer">
+          <MolstarRender2
           :url="state.inPreview.previewMolecule.url"
           :smiles="state.inPreview.previewMolecule.smiles"
           @click-rerender-pdb="rerenderPdb"
         />
+        </div>
         <div class="statistics-indexs">
           <StatisticsIndexs
-            v-for="(statistic, key, index) in state.inPreview.previewMolecule
-              .statisticsIndexs"
-            :key="index"
-            :type="key"
-            :value="statistic"
+            :statistics-url="state.inPreview.previewMolecule.statisticsUrl"
           />
         </div>
       </div>
@@ -173,12 +171,11 @@ const currentFormalStatisticsIndexs = computed(() => {
     num_atoms: 34,
     num_bonds: 36,
     num_rings: 3,
-    num_H_donors: 3,
-    num_H_acceptors: 6,
-    num_rotatable_bonds: 10,
+    num_benzene_rings: 2,
+    Vina: -1,
+    Lipinski: 2,
     QED: 0.4107814551480482,
     SA: 0.79,
-    LogP: 1.8503999999999996,
   };
 });
 </script>
@@ -210,9 +207,19 @@ const currentFormalStatisticsIndexs = computed(() => {
     height: 100%;
     overflow-y: auto;
     .render-view {
+      position: relative;
       width: 100%;
-      height: 600px;
+      height: 100%;
+      .renderer {
+        width: 100%;
+        height: 600px;
+      }
       .statistics-indexs {
+        display: flex;
+        flex-wrap: wrap;
+        position: relative;
+        width: 100%;
+        min-height: calc(100% - 600px);
         background-color: white;
       }
     }

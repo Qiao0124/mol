@@ -29,13 +29,7 @@
               :key="molecular.id"
             >
               <div class="molecules2d-svg">
-                <MoleculeStructure
-                  :id="String(molecular.id)"
-                  :structure="molecular.smiles"
-                  :width="130"
-                  :height="130"
-                  :svgMode="true"
-                />
+                <MoleculeStructure :imgURL="molecular.pngUrl" />
               </div>
               <div class="btns">
                 <button
@@ -79,13 +73,7 @@
               :key="molecular.id"
             >
               <div class="molecules2d-svg">
-                <MoleculeStructure
-                  :id="String(molecular.id)"
-                  :structure="molecular.smiles"
-                  :width="130"
-                  :height="130"
-                  :svgMode="true"
-                />
+                <MoleculeStructure :imgURL="molecular.pngUrl" />
               </div>
             </div>
             <div class="user-hint">You dislike the following molecules.</div>
@@ -95,13 +83,7 @@
               :key="molecular.id"
             >
               <div class="molecules2d-svg">
-                <MoleculeStructure
-                  :id="String(molecular.id)"
-                  :structure="molecular.smiles"
-                  :width="130"
-                  :height="130"
-                  :svgMode="true"
-                />
+                <MoleculeStructure :imgURL="molecular.pngUrl" />
               </div>
             </div>
           </div>

@@ -2,12 +2,11 @@ export interface statisticsIndexsM {
   num_atoms: number;
   num_bonds: number;
   num_rings: number;
-  num_H_donors: number;
-  num_H_acceptors: number;
-  num_rotatable_bonds: number;
+  num_benzene_rings: number;
+  Vina: number;
+  Lipinski: number;
   QED: number;
   SA: number;
-  LogP: number;
 }
 
 export interface ChatMessageM {
@@ -27,13 +26,15 @@ export interface MoleculeM {
   id: number;
   smiles: string;
   url: string;
+  pngUrl?: string;
+  statisticsUrl?: string;
   type: string;
   pdbId?: number; // 对应咬合的蛋白质的Id
   name: string;
   isLiked: boolean;
   isDisliked: boolean;
   isSubmited: boolean; // 在分子推送中，用户是否已经提交了偏好反馈
-  statisticsIndexs: statisticsIndexsM;
+  statisticsIndexs?: statisticsIndexsM;
 }
 
 export interface ChatRecommendationM {

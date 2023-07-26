@@ -1,0 +1,10 @@
+{
+    "QED": 0.7,
+    "SA": 0.81,
+    "Lipinski": 5.0,
+    "Vina": -9.1,
+    "num_atoms": 19.0,
+    "num_bonds": 20.0,
+    "num_rings": 2.0,
+    "num_benzene_rings": 1.0
+}
