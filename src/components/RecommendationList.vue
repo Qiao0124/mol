@@ -288,6 +288,7 @@ watch(state.messages, () => {
       flex: 1;
       overflow-y: auto;
       .message {
+        box-sizing: border-box;
         margin-bottom: 20px;
         display: flex;
         align-items: flex-start;
@@ -301,7 +302,7 @@ watch(state.messages, () => {
           border-radius: 50%;
           border: 1px solid #e5e5e5;
           pointer-events: none;
-          margin-right: 7px;
+          margin-right: 6px;
         }
         .molecules2d-list {
           box-sizing: border-box;
@@ -309,8 +310,8 @@ watch(state.messages, () => {
           flex-wrap: wrap;
           align-items: center;
           justify-content: flex-start;
-          width: calc(100% - 47px);
-          padding: 10px;
+          width: calc(100% - 46px);
+          padding: 8px;
           border-radius: 12px;
           background: #f8f8f8;
           text-align: start;
