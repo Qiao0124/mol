@@ -1,6 +1,6 @@
 <template>
   <div class="_chats-history">
-    <div class="topbar">Ligand Generation</div>
+    <div class="topbar">Molecule Generation</div>
     <div class="chats-list">
       <div class="chats-list-item">
         <div class="item-icon">

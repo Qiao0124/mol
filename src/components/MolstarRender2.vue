@@ -1,7 +1,7 @@
 <template>
   <div class="_molstar-render" >
     <div class="canvas-render" ref="_molstarRender"></div>
-    <button class="clear-sdfs" @click="clearAllSdfs">Clear all sdfs</button>
+    <button class="clear-sdfs" @click="clearAllSdfs">Clear</button>
   </div>
 </template>
 

@@ -8,6 +8,7 @@
     --primary-light7: #c6e2ff;
     --primary-light8:  #d9ecff;
     --primary-light9:  #ecf5ff;
+    --scrollbar-thumb-color: #ddd;
     --swiper-theme-color: #007aff;
     --swiper-navigation-size: 44px;
 
@@ -15,16 +16,21 @@
 }
 
 ::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
-    background-color: transparent;
+    width: 8px;
+    height: 2px;
+    background-color: white;
 }
 ::-webkit-scrollbar-thumb {
-    border-radius: 2px;
-    background-color: #035de6;
+    height: 40px;
+    border-radius: 10px;
+    background-color: var(--scrollbar-thumb-color);
 }
+::-webkit-scrollbar-thumb:hover {
+    cursor: pointer;
+}
+
 ::-webkit-scrollbar-track {
-    border-radius: 4px;
+    border-radius: 10px;
     background-color: transparent;
 }
 html{

@@ -20,7 +20,7 @@
           <img class="icon" src="@/assets/qms9.jpg" alt="" v-else />
           <div class="molecules2d-list" v-if="message && !message.isUser">
             <div class="bot-hint" v-if="!message.isUser">
-              Which ligands do you like or dislike? You need to mark your
+              Which molecules do you like or dislike? You need to mark your
               preferences and submit them.
             </div>
             <div
