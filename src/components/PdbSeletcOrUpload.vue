@@ -25,7 +25,7 @@
           <button
             @click.once="uploadPdb"
             v-loading="state.pending"
-            :disabled="!state.pdbUploaded"
+            :disabled="!state.pdbUploaded || true"
           >
             upload
           </button>
@@ -39,7 +39,10 @@
 import { reactive, ref, onMounted, defineEmits } from "vue";
 import * as api from "@/api";
 import { MoleculeM } from "@/models";
+import { useMolStore } from "@/store";
+import { storeToRefs } from "pinia";
 
+const molStore = useMolStore();
 const emits = defineEmits(["pdb-uploaded", "pdb-selected"]);
 
 interface stateM {
@@ -73,12 +76,15 @@ const getFile = (event) => {
   }
 };
 
-const selectPdb = () => {
+const selectPdb = async () => {
   state.pending = true;
-  setTimeout(() => {
-    state.pending = false;
-    emits("pdb-selected", state.pdbSelected);
-  }, 1000);
+  molStore.setCurrentPdbAndTimestamp(
+    state.pdbSelected?.pdbId as number,
+    Date.now().toString()
+  );
+  await api.reqConfirmPdb(molStore.getCurrentPdbId(), molStore.getTimestamp());
+  state.pending = false;
+  emits("pdb-selected", state.pdbSelected);
 };
 
 const uploadPdb = () => {

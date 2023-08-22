@@ -17,21 +17,21 @@
 <script lang="ts" setup>
 import * as echarts from "echarts";
 import { ref, onMounted, defineProps, watch, reactive } from "vue";
-import { statisticsIndexsM } from "@/models";
+import { Metrics } from "@/models";
 import * as api from "@/api";
 
 const chartContainer = ref(null);
-const props = defineProps<{ statisticsUrl?: string }>();
+const props = defineProps<{ statistics: Metrics }>();
 const state = reactive({
   statistics: {
-    num_atoms: 0,
-    num_bonds: 0,
-    num_rings: 0,
-    num_benzene_rings: 0,
-    Vina: 0,
     Lipinski: 0,
+    NumAtoms: 0,
+    NumBenzeneRings: 0,
+    NumBonds: 0,
+    NumRings: 0,
     QED: 0,
     SA: 0,
+    Vina: 0,
   },
 });
 
@@ -55,20 +55,6 @@ function getMaximum(label: string) {
       return 5;
     default:
       return 1;
-  }
-}
-
-function checkIfShowRange(label: string) {
-  if (
-    label == "num_atoms" ||
-    label == "num_bonds" ||
-    label == "num_rings" ||
-    label == "num_benzene_rings" ||
-    label == "Vina"
-  ) {
-    return false;
-  } else {
-    return true;
   }
 }
 
@@ -144,32 +130,32 @@ function drawRange(
 }
 
 onMounted(async () => {
-  if (!props.statisticsUrl) return;
-  state.statistics = await api.reqGetStatistics(props.statisticsUrl);
+  if (!props) return;
+  state.statistics = props.statistics;
   drawRange(
     "num_atoms",
-    Number(state.statistics.num_atoms.toFixed(3)),
+    Number(state.statistics.NumAtoms.toFixed(3)),
     0,
     getMaximum("num_atoms"),
     "Atoms Num"
   );
   drawRange(
     "num_bonds",
-    Number(state.statistics.num_bonds.toFixed(3)),
+    Number(state.statistics.NumBonds.toFixed(3)),
     0,
     getMaximum("num_bonds"),
     "Bonds Num"
   );
   drawRange(
     "num_rings",
-    Number(state.statistics.num_rings.toFixed(3)),
+    Number(state.statistics.NumRings.toFixed(3)),
     0,
     getMaximum("num_rings"),
     "Rings Num"
   );
   drawRange(
     "num_benzene_rings",
-    Number(state.statistics.num_benzene_rings.toFixed(3)),
+    Number(state.statistics.NumBenzeneRings.toFixed(3)),
     0,
     getMaximum("num_benzene_rings"),
     "Benzene Rings Num"
@@ -205,35 +191,34 @@ onMounted(async () => {
 });
 
 watch(
-  () => props.statisticsUrl,
+  () => props.statistics,
   async () => {
-    if (!props.statisticsUrl) return;
-    state.statistics = await api.reqGetStatistics(props.statisticsUrl);
-    console.log(state.statistics);
+    if (!props.statistics) return;
+    state.statistics = props.statistics;
     drawRange(
       "num_atoms",
-      Number(state.statistics.num_atoms.toFixed(3)),
+      Number(state.statistics.NumAtoms.toFixed(3)),
       0,
       getMaximum("num_atoms"),
       "Atoms Num"
     );
     drawRange(
       "num_bonds",
-      Number(state.statistics.num_bonds.toFixed(3)),
+      Number(state.statistics.NumBonds.toFixed(3)),
       0,
       getMaximum("num_bonds"),
       "Bonds Num"
     );
     drawRange(
       "num_rings",
-      Number(state.statistics.num_rings.toFixed(3)),
+      Number(state.statistics.NumRings.toFixed(3)),
       0,
       getMaximum("num_rings"),
       "Rings Num"
     );
     drawRange(
       "num_benzene_rings",
-      Number(state.statistics.num_benzene_rings.toFixed(3)),
+      Number(state.statistics.NumBenzeneRings.toFixed(3)),
       0,
       getMaximum("num_benzene_rings"),
       "Benzene Rings Num"

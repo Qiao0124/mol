@@ -34,7 +34,7 @@ export interface MoleculeM {
   isLiked: boolean;
   isDisliked: boolean;
   isSubmited: boolean; // 在分子推送中，用户是否已经提交了偏好反馈
-  statisticsIndexs?: statisticsIndexsM;
+  statisticsIndexs?: Metrics;
 }
 
 export interface ChatRecommendationM {
@@ -45,7 +45,11 @@ export interface ChatRecommendationM {
   canSubmit: boolean;
   replyId?: number | null;
   isUser: boolean;
+  isAiGenerated?: boolean;
+  canScoreAiEffect?: boolean;
+  score?: number;
   context?: string[] | null;
+  readyToCheck?: boolean;
 }
 
 // 发送对话后的响应模型
@@ -54,4 +58,60 @@ export interface SendMessageM {
   newContext: any[]; // context 类型未定
   reply: string;
   chatId: number;
+}
+
+/////// api module //////
+export interface GetPdbsResM {
+  pdb_list: PdbList[];
+}
+
+export interface PdbList {
+  id: number;
+  name: string;
+  url: string;
+}
+
+export interface ConfirmPdbReqM {
+  timestamp: string;
+  pdb: string;
+  id: number;
+}
+
+export interface ConfirmPdbResM {
+  msg: string;
+}
+
+export interface SubmitMolPreferenceReqM {
+  timestamp: string;
+  pdb_id: number;
+  liked_ids: number[];
+  disliked_ids: number[];
+}
+
+export interface SubmitMolPreferenceResM {
+  check_prompt: boolean;
+  next_molecules: NextMolecule[];
+}
+
+export interface GetSdfsAiGeneratedResM {
+  molecules: NextMolecule[];
+}
+
+export interface NextMolecule {
+  id: number;
+  metrics: Metrics;
+  png_url: string;
+  smiles: string;
+  url: string;
+}
+
+export interface Metrics {
+  Lipinski: number;
+  NumAtoms: number;
+  NumBenzeneRings: number;
+  NumBonds: number;
+  NumRings: number;
+  QED: number;
+  SA: number;
+  Vina: number;
 }

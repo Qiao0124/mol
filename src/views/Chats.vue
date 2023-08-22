@@ -37,7 +37,7 @@
         </div>
         <div class="statistics-indexs">
           <StatisticsIndexs
-            :statistics-url="state.inPreview.previewMolecule.statisticsUrl"
+            :statistics="(state.inPreview.previewMolecule.statisticsIndexs as Metrics)"
           />
         </div>
       </div>
@@ -48,10 +48,7 @@
         />
         <div class="statistics-indexs">
           <StatisticsIndexs
-            v-for="(statistic, key, index) in currentFormalStatisticsIndexs"
-            :key="index"
-            :type="key"
-            :value="statistic"
+          :statistics="(state.inFormal.formalMolecule.statisticsIndexs as Metrics)"
           />
         </div>
       </div>
@@ -69,7 +66,7 @@ import RecommendationList from "@/components/RecommendationList.vue";
 import PdbSeletcOrUpload from "@/components/PdbSeletcOrUpload.vue";
 import StatisticsIndexs from "@/components/StatisticsIndexs.vue";
 import { ref, onMounted, watch, reactive, computed, nextTick } from "vue";
-import { MoleculeM, ChatRecommendationM } from "@/models";
+import { MoleculeM, ChatRecommendationM, Metrics } from "@/models";
 import DialogBox from "@/components/DialogBox.vue";
 import ChatsHistory from "@/components/ChatsHistory.vue";
 
@@ -154,29 +151,6 @@ const currentFormalUrl = computed(() => {
   } else {
     return "./examples/protein_ligand/protein_ligand_1.pdb";
   }
-});
-
-const currentPreviewUrl = computed(() => {
-  return (
-    "./examples/" +
-    state.inPreview.previewMolecule.name +
-    "/before_" +
-    state.inPreview.previewMolecule.name +
-    ".sdf"
-  );
-});
-
-const currentFormalStatisticsIndexs = computed(() => {
-  return {
-    num_atoms: 34,
-    num_bonds: 36,
-    num_rings: 3,
-    num_benzene_rings: 2,
-    Vina: -1,
-    Lipinski: 2,
-    QED: 0.4107814551480482,
-    SA: 0.79,
-  };
 });
 </script>
 

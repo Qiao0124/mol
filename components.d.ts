@@ -9,6 +9,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     ChatsHistory: typeof import('./src/components/ChatsHistory.vue')['default']
     DialogBox: typeof import('./src/components/DialogBox.vue')['default']
+    ElRate: typeof import('element-plus/es')['ElRate']
     FadeTransition: typeof import('./src/components/FadeTransition.vue')['default']
     MoleculeStructure: typeof import('./src/components/MoleculeStructure.vue')['default']
     MolstarRender: typeof import('./src/components/MolstarRender.vue')['default']
