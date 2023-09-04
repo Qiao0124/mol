@@ -66,13 +66,13 @@
                 @click="methods.likeAll(msgIndex)"
                 :disabled="!message.canSubmit"
               >
-                like all
+                Like all
               </button>
               <button
                 @click="methods.dislikeAll(msgIndex)"
                 :disabled="!message.canSubmit"
               >
-                dislike all
+                Dislike all
               </button>
               <button
                 @click="methods.submitPreferrnce(msgIndex)"
@@ -95,7 +95,13 @@
             <div class="check-promt" v-if="message.readyToCheck">
               You have made m annotations, do you want to know if I have got
               your idea?
-              <button>yes</button>
+              <button
+                @click="getMolsAiGenerated(msgIndex)"
+                :disabled="!message.canSubmit"
+                v-loading="message.isAiGenerating"
+              >
+                Yes
+              </button>
             </div>
           </div>
           <div class="molecules2d-list" v-else-if="message && message.isUser">
@@ -157,6 +163,7 @@ const state: stateM = reactive({
   dislikedMolecules: [],
   dislikedMoleculeIds: [],
   messages: [],
+  isAiGenerating: false,
 });
 
 const methods = reactive({
@@ -175,6 +182,9 @@ const methods = reactive({
     state.dislikedMolecules = state.dislikedMolecules.filter(
       (item) => item.id !== molecule.id
     );
+    state.dislikedMoleculeIds = state.dislikedMoleculeIds.filter(
+      (id) => id !== molecule.id
+    );
     state.likedMolecules.push(molecule);
     state.likedMoleculeIds.push(molecule.id);
   },
@@ -185,7 +195,11 @@ const methods = reactive({
     state.likedMolecules = state.likedMolecules.filter(
       (item) => item.id !== molecule.id
     );
+    state.likedMoleculeIds = state.likedMoleculeIds.filter(
+      (id) => id !== molecule.id
+    );
     state.dislikedMolecules.push(molecule);
+    state.dislikedMoleculeIds.push(molecule.id);
   },
   likeAll(msgIndex: number) {
     state.messages[msgIndex].molecules.forEach((molecule) => {
@@ -193,7 +207,9 @@ const methods = reactive({
       molecule.isDisliked = false;
     });
     state.likedMolecules = state.messages[msgIndex].molecules;
+    state.likedMoleculeIds = state.likedMolecules.map((item) => item.id);
     state.dislikedMolecules = [];
+    state.dislikedMoleculeIds = [];
   },
   dislikeAll(msgIndex: number) {
     state.messages[msgIndex].molecules.forEach((molecule) => {
@@ -201,13 +217,26 @@ const methods = reactive({
       molecule.isLiked = false;
     });
     state.dislikedMolecules = state.messages[msgIndex].molecules;
+    state.dislikedMoleculeIds = state.dislikedMolecules.map((item) => item.id);
     state.likedMolecules = [];
+    state.likedMoleculeIds = [];
   },
   async submitPreferrnce(msgIndex: number) {
     state.messages[msgIndex].canSubmit = false;
     state.messages[msgIndex].molecules.forEach((molecule) => {
       molecule.isSubmited = true;
     });
+    state.messages.push({
+      id: Date.now(),
+      isUser: true,
+      molecules: state.likedMolecules,
+      likedMolecules: state.likedMolecules,
+      dislikedMolecules: state.dislikedMolecules,
+      canSubmit: false,
+    });
+
+    inputText.value = "";
+    isSending.value = true;
     await sendMessage();
   },
   async checkAiEffects(msgIndex: number) {
@@ -226,7 +255,12 @@ const methods = reactive({
   async scoreAiEffects(score: number, msgIndex: number) {
     state.messages[msgIndex].score = score;
     state.messages[msgIndex].canScoreAiEffect = false;
-    await this.submitPreferrnce(msgIndex);
+    state.messages[msgIndex].canSubmit = false;
+    state.messages[msgIndex].molecules.forEach((molecule) => {
+      molecule.isSubmited = true;
+    });
+    await sendMessage();
+    await api.reqScoreEffect(score, molStore.getTimestamp());
   },
   async clear() {
     state.messages = [];
@@ -239,19 +273,27 @@ const methods = reactive({
   },
 });
 
-const sendMessage = async () => {
-  state.messages.push({
-    id: Date.now(),
-    isUser: true,
-    molecules: state.likedMolecules,
-    likedMolecules: state.likedMolecules,
-    dislikedMolecules: state.dislikedMolecules,
-    canSubmit: false,
+const getMolsAiGenerated = async (msgIndex: number) => {
+  state.messages[msgIndex].canSubmit = false;
+  state.messages[msgIndex].molecules.forEach((molecule) => {
+    molecule.isSubmited = true;
   });
+  state.messages[msgIndex].isAiGenerating = true;
+  const moleculesRecommend: ChatRecommendationM =
+    await api.reqGetSdfsAiGenerated(molStore.getTimestamp());
 
-  inputText.value = "";
-  isSending.value = true;
+  state.molecules = moleculesRecommend.molecules;
+  state.messages.push(moleculesRecommend);
+  state.messages[msgIndex].isAiGenerating = false;
+  isSending.value = false;
+  isModifiedMolecular.value = true;
+  state.likedMolecules = [];
+  state.likedMoleculeIds = [];
+  state.dislikedMolecules = [];
+  state.dislikedMoleculeIds = [];
+};
 
+const sendMessage = async () => {
   // TODO: send message to openai server ( mock )
   setTimeout(async () => {
     const moleculesRecommend: ChatRecommendationM =
@@ -266,13 +308,11 @@ const sendMessage = async () => {
 
     isSending.value = false;
     isModifiedMolecular.value = true;
-  }, 1500);
-
-  state.likedMolecules = [];
-  state.likedMoleculeIds = [];
-  state.dislikedMolecules = [];
-  state.dislikedMoleculeIds = [];
-
+    state.likedMolecules = [];
+    state.likedMoleculeIds = [];
+    state.dislikedMolecules = [];
+    state.dislikedMoleculeIds = [];
+  }, 1000);
   // TODO: send message to openai server (Comment out the code for the mock before using the following code)
   // let { isOk, newContext, reply } = await reqSendMessage(
   //   inputText.value.trim(),
@@ -295,9 +335,7 @@ const sendMessage = async () => {
 };
 
 onMounted(async () => {
-  const moleculesRecommend: ChatRecommendationM = await reqMolecularRecommend(
-    state.likedMoleculeIds
-  );
+  const moleculesRecommend = molStore.getInitialRecommendation();
   state.molecules = moleculesRecommend.molecules;
   console.log("moleculesRecommend", moleculesRecommend);
   state.messages.push(moleculesRecommend);
@@ -479,6 +517,7 @@ watch(state.messages, () => {
             button {
               box-sizing: border-box;
               padding: 3px;
+              margin: 10px;
               width: 80px;
               height: 25px;
               color: white;

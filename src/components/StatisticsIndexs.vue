@@ -130,7 +130,7 @@ function drawRange(
 }
 
 onMounted(async () => {
-  if (!props) return;
+  if (!props.statistics) return;
   state.statistics = props.statistics;
   drawRange(
     "num_atoms",

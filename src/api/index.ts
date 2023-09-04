@@ -4,6 +4,9 @@ import requests from "./request";
 import { AxiosPromise } from "axios";
 import * as models from "@/models";
 import Qs from "qs";
+import { useMolStore } from "@/store";
+
+const molStore = useMolStore();
 
 export async function reqSendMessage(
   message: string,
@@ -295,6 +298,7 @@ export async function reqGetPdbs(): Promise<models.MoleculeM[]> {
     const pdbMolecule: models.MoleculeM = {
       id: pdb.id,
       smiles: "",
+      pdbId: pdb.id,
       name: pdb.name,
       url: pdb.url,
       type: "pdb",
@@ -304,33 +308,62 @@ export async function reqGetPdbs(): Promise<models.MoleculeM[]> {
     };
     pdbs.push(pdbMolecule);
   });
+  molStore.setCsrfToken(rawPdbs.token);
   return pdbs;
 }
 
-export async function reqConfirmPdb(
-  pdbId: number,
+export async function reqConfirmPdbAndGetInitialMols(
+  pdbId: string,
   timestamp: string,
-  pdb = "2V3R"
-): Promise<boolean> {
+  pdb: string
+): Promise<models.ChatRecommendationM> {
   const params: models.ConfirmPdbReqM = {
     timestamp,
     id: pdbId,
-    pdb,
+    pdb_id: pdb,
   };
   const res = await requests({
-    url: `api/confirmpdb`,
-    method: "get",
-    data: params,
+    url: `api/confirmpdb/`,
+    method: "post",
+    data: Qs.stringify(params),
   });
-  return true;
+  const submitMolPreferenceRes: models.SubmitMolPreferenceResM = res.data;
+  const molecules: models.MoleculeM[] = [];
+  submitMolPreferenceRes.next_molecules.forEach((rawMolecule) => {
+    const molecule: models.MoleculeM = {
+      id: rawMolecule.id,
+      smiles: rawMolecule.smiles,
+      name: "example",
+      url: rawMolecule.url,
+      statisticsIndexs: rawMolecule.metrics,
+      pngUrl: rawMolecule.png_url,
+      type: "sdf",
+      isLiked: false,
+      isDisliked: false,
+      isSubmited: false,
+    };
+    molecules.push(molecule);
+  });
+  const response: models.ChatRecommendationM = {
+    id: 1,
+    replyId: 1,
+    isUser: false,
+    canSubmit: true,
+    context: [],
+    readyToCheck: submitMolPreferenceRes.check_prompt,
+    molecules: molecules,
+    likedMolecules: [],
+    dislikedMolecules: [],
+  };
+  molStore.setInitialRecommendation(response);
+  return response;
 }
 
 export async function reqSubmitMolPreference(
-  pdb_id: number,
+  pdb_id: string,
   timestamp: string,
   likedMolecularIds: number[] = [],
-  dislikedMolecularIds: number[] = [],
-  messageId: number | null = null
+  dislikedMolecularIds: number[] = []
 ): Promise<models.ChatRecommendationM> {
   const params: models.SubmitMolPreferenceReqM = {
     pdb_id: pdb_id,
@@ -339,8 +372,8 @@ export async function reqSubmitMolPreference(
     timestamp: timestamp,
   };
   const res = await requests({
-    url: `api/getMoleculeList`,
-    method: "get",
+    url: `api/preference/`,
+    method: "post",
     data: params,
   });
   const submitMolPreferenceRes: models.SubmitMolPreferenceResM = res.data;
@@ -387,7 +420,7 @@ export async function reqGetSdfsAiGenerated(
   });
   const submitMolPreferenceRes: models.GetSdfsAiGeneratedResM = res.data;
   const molecules: models.MoleculeM[] = [];
-  submitMolPreferenceRes.molecules.forEach((rawMolecule) => {
+  submitMolPreferenceRes.next_molecules.forEach((rawMolecule) => {
     const molecule: models.MoleculeM = {
       id: rawMolecule.id,
       smiles: rawMolecule.smiles,
@@ -407,6 +440,7 @@ export async function reqGetSdfsAiGenerated(
     replyId: 1,
     isUser: false,
     isAiGenerated: true,
+    isAiGenerating: false,
     canSubmit: true,
     canScoreAiEffect: true,
     score: 0,
@@ -425,8 +459,8 @@ export async function reqScoreEffect(score: number, timestamp: string) {
   };
   await requests({
     url: `api/feedback`,
-    method: "get",
-    params: params,
+    method: "post",
+    data: params,
   });
   return true;
 }

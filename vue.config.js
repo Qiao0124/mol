@@ -5,6 +5,25 @@ const { ElementPlusResolver } = require("unplugin-vue-components/resolvers");
 module.exports = defineConfig({
   transpileDependencies: true,
   lintOnSave: false,
+  devServer: {
+    proxy: {
+      "/api": {
+        target: "http://118.193.102.41:8000",
+        ws: true,
+        changeOrigin: true,
+      },
+      "/static": {
+        target: "http://118.193.102.41:8000",
+        ws: true,
+        changeOrigin: true,
+      },
+      "/full_pdb": {
+        target: "http://118.193.102.41:8000/static",
+        ws: true,
+        changeOrigin: true,
+      },
+    },
+  },
   configureWebpack: {
     resolve: {
       fallback: {

@@ -2,10 +2,19 @@
   <div class="_pdb-seletc-or-upload">
     <div class="inner-window">
       <div class="pdb-selections">
-        <div class="selection" v-for="(pdb, index) in state.pdbs" :key="index">
-          <div class="pdb-name">{{ pdb.name }}</div>
-          <input type="radio" v-model="state.pdbSelected" :value="pdb" />
-        </div>
+        <el-select
+          v-model="state.pdbSelected"
+          class="m-2"
+          placeholder="Select"
+          size="large"
+        >
+          <el-option
+            v-for="(pdb, index) in state.pdbs"
+            :key="index"
+            :label="pdb.name"
+            :value="pdb"
+          />
+        </el-select>
       </div>
       <div class="pdb-upload">
         or you can upload a pdb file
@@ -79,10 +88,14 @@ const getFile = (event) => {
 const selectPdb = async () => {
   state.pending = true;
   molStore.setCurrentPdbAndTimestamp(
-    state.pdbSelected?.pdbId as number,
+    state.pdbSelected?.name as string,
     Date.now().toString()
   );
-  await api.reqConfirmPdb(molStore.getCurrentPdbId(), molStore.getTimestamp());
+  await api.reqConfirmPdbAndGetInitialMols(
+    molStore.getCurrentPdbId(),
+    molStore.getTimestamp(),
+    molStore.getCurrentPdbId()
+  );
   state.pending = false;
   emits("pdb-selected", state.pdbSelected);
 };

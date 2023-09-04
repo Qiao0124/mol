@@ -45,6 +45,7 @@ export interface ChatRecommendationM {
   canSubmit: boolean;
   replyId?: number | null;
   isUser: boolean;
+  isAiGenerating?: boolean;
   isAiGenerated?: boolean;
   canScoreAiEffect?: boolean;
   score?: number;
@@ -63,6 +64,7 @@ export interface SendMessageM {
 /////// api module //////
 export interface GetPdbsResM {
   pdb_list: PdbList[];
+  token: string;
 }
 
 export interface PdbList {
@@ -73,8 +75,8 @@ export interface PdbList {
 
 export interface ConfirmPdbReqM {
   timestamp: string;
-  pdb: string;
-  id: number;
+  pdb_id: string;
+  id: string;
 }
 
 export interface ConfirmPdbResM {
@@ -83,7 +85,7 @@ export interface ConfirmPdbResM {
 
 export interface SubmitMolPreferenceReqM {
   timestamp: string;
-  pdb_id: number;
+  pdb_id: string;
   liked_ids: number[];
   disliked_ids: number[];
 }
@@ -94,7 +96,7 @@ export interface SubmitMolPreferenceResM {
 }
 
 export interface GetSdfsAiGeneratedResM {
-  molecules: NextMolecule[];
+  next_molecules: NextMolecule[];
 }
 
 export interface NextMolecule {

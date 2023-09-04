@@ -1,5 +1,5 @@
 <template>
-  <div class="_molstar-render" >
+  <div class="_molstar-render">
     <div class="canvas-render" ref="_molstarRender"></div>
     <button class="clear-sdfs" @click="clearAllSdfs">Clear</button>
   </div>
@@ -11,7 +11,7 @@ import { useMolStore } from "@/store";
 import { defineProps, onMounted, reactive, ref, watch, defineEmits } from "vue";
 
 const molStore = useMolStore();
-const emits = defineEmits(["click-rerender-pdb"])
+const emits = defineEmits(["click-rerender-pdb"]);
 
 const props = defineProps({
   url: {
@@ -132,6 +132,20 @@ function clearAllSdfs() {
   emits("click-rerender-pdb", urlsRendered[0]);
 }
 
+function getModifiedPngUrlString(str: string | undefined) {
+  if (!str) return;
+  const inputString = str;
+  const searchString = "backend/app01/";
+  const replacementString = "";
+
+  if (inputString.includes(searchString)) {
+    const modifiedString = inputString.replace(searchString, replacementString);
+    return modifiedString;
+  } else {
+    return inputString; // 如果字符串中不包含要替换的部分，直接返回原字符串
+  }
+}
+
 onMounted(async () => {
   let viewerReturned = await initViewer(
     _molstarRender.value as unknown as HTMLElement
@@ -139,8 +153,11 @@ onMounted(async () => {
   viewerOut = viewerReturned;
   molStore.setViewer(viewerReturned);
   let viewer = molStore.getViewer();
-  urlsRendered.push(props.url);
-  await viewerOut.loadStructureFromUrl(props.url, "pdb");
+  urlsRendered.push(props.url as string);
+  await viewerOut.loadStructureFromUrl(
+    getModifiedPngUrlString(props.url),
+    "pdb"
+  );
 });
 
 watch(
@@ -150,7 +167,10 @@ watch(
       return;
     }
     urlsRendered.push(newUrl);
-    await viewerOut.loadStructureFromUrl(newUrl, "sdf");
+    await viewerOut.loadStructureFromUrl(
+      getModifiedPngUrlString(props.url),
+      "sdf"
+    );
   }
 );
 </script>
