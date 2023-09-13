@@ -47,7 +47,7 @@
         </div>
       </div>
       <div v-else-if="state.scoreFinish">
-        submitted success! Going to the next round...
+        Submitted successfully! Going to the next round...
       </div>
     </FadeTransition>
   </div>
