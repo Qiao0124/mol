@@ -4,7 +4,7 @@
       <div class="button-to-return">
         <button @click="methods.clear">Clear</button>
       </div>
-      <div class="chat-history">
+      <div class="chat-history" ref="scrollDiv">
         <div
           v-for="(message, msgIndex) in state.messages"
           :key="message.id"
@@ -36,7 +36,6 @@
               </div>
               <div class="btns">
                 <button
-                  v-if="!message.isAiGenerated"
                   @click="methods.like(molecular, msgIndex, molIndex)"
                   class="like"
                   :class="molecular.isLiked ? 'isLiked' : ''"
@@ -45,7 +44,6 @@
                   <img src="@/assets/like.svg" alt="" />
                 </button>
                 <button
-                  v-if="!message.isAiGenerated"
                   @click="methods.dislike(molecular, msgIndex, molIndex)"
                   class="dislike"
                   :class="molecular.isDisliked ? 'isDisliked' : ''"
@@ -81,52 +79,55 @@
                 Submit
               </button>
             </div>
-            <div class="check-effect-btn" v-if="message.isAiGenerated">
-              <el-rate
-                v-model="message.score"
-                :disabled="!message.canScoreAiEffect"
-                :texts="['oops', 'disappointed', 'normal', 'good', 'great']"
-                show-text
-                @change="
-                  methods.scoreAiEffects(message.score as number, msgIndex)
-                "
-              />
-            </div>
-            <div class="check-promt" v-if="message.readyToCheck">
-              You have made m annotations, do you want to know if I have got
-              your idea?
-              <button
-                @click="getMolsAiGenerated(msgIndex)"
-                :disabled="!message.canSubmit"
-                v-loading="message.isAiGenerating"
-              >
-                Yes
-              </button>
-            </div>
           </div>
           <div class="molecules2d-list" v-else-if="message && message.isUser">
-            <div class="user-hint">You like the following molecules.</div>
-            <div
-              class="molecules2d"
-              v-for="molecular in message.likedMolecules"
-              :key="molecular.id"
-            >
-              <div class="molecules2d-svg">
-                <MoleculeStructure :imgURL="molecular.pngUrl" />
+            <div class="user-hint" v-if="message.likedMolecules.length == 8">
+              You like all of the proposed molecules.
+            </div>
+            <div class="user-hint" v-else-if="message.likedMolecules.length">
+              <div class="user-hint">You like the following molecules.</div>
+              <div
+                class="molecules2d"
+                v-for="molecular in message.likedMolecules"
+                :key="molecular.id"
+              >
+                <div class="molecules2d-svg">
+                  <MoleculeStructure :imgURL="molecular.pngUrl" />
+                </div>
               </div>
             </div>
-            <div class="user-hint">You dislike the following molecules.</div>
-            <div
-              class="molecules2d"
-              v-for="molecular in message.dislikedMolecules"
-              :key="molecular.id"
-            >
-              <div class="molecules2d-svg">
-                <MoleculeStructure :imgURL="molecular.pngUrl" />
+
+            <div class="user-hint" v-if="message.dislikedMolecules.length == 8">
+              You dislike all of the proposed molecules.
+            </div>
+            <div class="user-hint" v-else-if="message.dislikedMolecules.length">
+              <div class="user-hint">You dislike the following molecules.</div>
+              <div
+                class="molecules2d"
+                v-for="molecular in message.dislikedMolecules"
+                :key="molecular.id"
+              >
+                <div class="molecules2d-svg">
+                  <MoleculeStructure :imgURL="molecular.pngUrl" />
+                </div>
               </div>
+            </div>
+            <div
+              class="user-hint"
+              v-if="
+                !message.dislikedMolecules.length &&
+                !message.likedMolecules.length
+              "
+            >
+              You made no annotations.
             </div>
           </div>
         </div>
+        <FadeTransition>
+          <div class="loading" v-if="state.loading">
+            <Loading />
+          </div>
+        </FadeTransition>
       </div>
     </div>
   </div>
@@ -138,14 +139,15 @@ import { MoleculeM, ChatRecommendationM } from "@/models";
 import { reactive, onMounted, ref, watch, defineEmits } from "vue";
 import { useMolStore } from "@/store/index";
 import MoleculeStructure from "./MoleculeStructure.vue";
+import Loading from "@/components/Loading.vue";
+import FadeTransition from "@/components/FadeTransition.vue";
 
 const emit = defineEmits(["click-to-select", "click-to-preview"]);
-const messages = ref([]);
 const inputText = ref("");
 const isSending = ref(false);
 const isModifiedMolecular = ref(false);
-const context = ref([]);
 const molStore = useMolStore();
+const scrollDiv = ref();
 
 interface stateM {
   molecules: MoleculeM[];
@@ -154,6 +156,7 @@ interface stateM {
   likedMoleculeIds: number[];
   dislikedMoleculeIds: number[];
   messages: ChatRecommendationM[];
+  loading: boolean;
 }
 
 const state: stateM = reactive({
@@ -164,6 +167,7 @@ const state: stateM = reactive({
   dislikedMoleculeIds: [],
   messages: [],
   isAiGenerating: false,
+  loading: true,
 });
 
 const methods = reactive({
@@ -234,85 +238,49 @@ const methods = reactive({
       dislikedMolecules: state.dislikedMolecules,
       canSubmit: false,
     });
-
+    console.log("Submit 1!");
     inputText.value = "";
     isSending.value = true;
     await sendMessage();
   },
-  async checkAiEffects(msgIndex: number) {
-    state.messages[msgIndex].canSubmit = false;
-    state.messages[msgIndex].molecules.forEach((molecule) => {
-      molecule.isSubmited = true;
-    });
-    const moleculesAiGenerated: ChatRecommendationM =
-      await api.reqGetSdfsAiGenerated(molStore.getTimestamp());
-    state.molecules = moleculesAiGenerated.molecules;
-    state.messages.push(moleculesAiGenerated);
-
-    isSending.value = false;
-    isModifiedMolecular.value = true;
-  },
-  async scoreAiEffects(score: number, msgIndex: number) {
-    state.messages[msgIndex].score = score;
-    state.messages[msgIndex].canScoreAiEffect = false;
-    state.messages[msgIndex].canSubmit = false;
-    state.messages[msgIndex].molecules.forEach((molecule) => {
-      molecule.isSubmited = true;
-    });
-    await sendMessage();
-    await api.reqScoreEffect(score, molStore.getTimestamp());
-  },
   async clear() {
     state.messages = [];
-    const moleculesRecommend: ChatRecommendationM = await reqMolecularRecommend(
-      state.likedMoleculeIds
-    );
+    const moleculesRecommend: ChatRecommendationM =
+      await api.reqSubmitMolPreference(
+        molStore.getCurrentPdbId(),
+        molStore.getTimestamp(),
+        [],
+        []
+      );
     state.molecules = moleculesRecommend.molecules;
     console.log("moleculesRecommend", moleculesRecommend);
     state.messages.push(moleculesRecommend);
   },
 });
 
-const getMolsAiGenerated = async (msgIndex: number) => {
-  state.messages[msgIndex].canSubmit = false;
-  state.messages[msgIndex].molecules.forEach((molecule) => {
-    molecule.isSubmited = true;
-  });
-  state.messages[msgIndex].isAiGenerating = true;
+const sendMessage = async () => {
+  // TODO: send message to openai server ( mock )
+  state.loading = true;
   const moleculesRecommend: ChatRecommendationM =
-    await api.reqGetSdfsAiGenerated(molStore.getTimestamp());
-
+    await api.reqSubmitMolPreference(
+      molStore.getCurrentPdbId(),
+      molStore.getTimestamp(),
+      state.likedMoleculeIds,
+      state.dislikedMoleculeIds
+    );
+  console.log("Submit 2!");
+  console.log("readyToCheck?", moleculesRecommend.readyToCheck);
+  molStore.setCheckPrompt(moleculesRecommend.readyToCheck ? true : false);
   state.molecules = moleculesRecommend.molecules;
   state.messages.push(moleculesRecommend);
-  state.messages[msgIndex].isAiGenerating = false;
+
+  state.loading = false;
   isSending.value = false;
   isModifiedMolecular.value = true;
   state.likedMolecules = [];
   state.likedMoleculeIds = [];
   state.dislikedMolecules = [];
   state.dislikedMoleculeIds = [];
-};
-
-const sendMessage = async () => {
-  // TODO: send message to openai server ( mock )
-  setTimeout(async () => {
-    const moleculesRecommend: ChatRecommendationM =
-      await api.reqSubmitMolPreference(
-        molStore.getCurrentPdbId(),
-        molStore.getTimestamp(),
-        state.likedMoleculeIds,
-        state.dislikedMoleculeIds
-      );
-    state.molecules = moleculesRecommend.molecules;
-    state.messages.push(moleculesRecommend);
-
-    isSending.value = false;
-    isModifiedMolecular.value = true;
-    state.likedMolecules = [];
-    state.likedMoleculeIds = [];
-    state.dislikedMolecules = [];
-    state.dislikedMoleculeIds = [];
-  }, 1000);
   // TODO: send message to openai server (Comment out the code for the mock before using the following code)
   // let { isOk, newContext, reply } = await reqSendMessage(
   //   inputText.value.trim(),
@@ -339,14 +307,15 @@ onMounted(async () => {
   state.molecules = moleculesRecommend.molecules;
   console.log("moleculesRecommend", moleculesRecommend);
   state.messages.push(moleculesRecommend);
+  state.loading = false;
 
-  const chatHistory = document.querySelector(".chat-history");
-  chatHistory.scrollTop = chatHistory.scrollHeight;
+  scrollDiv.value.scrollTop = scrollDiv.value.scrollHeight;
+  console.log("chatHistory.scrollHeight", scrollDiv.value.scrollHeight);
 });
 
 watch(state.messages, () => {
-  const chatHistory = document.querySelector(".chat-history");
-  chatHistory.scrollTop = chatHistory.scrollHeight;
+  scrollDiv.value.scrollTop = scrollDiv.value.scrollHeight;
+  console.log("chatHistory.scrollHeight", scrollDiv.value.scrollHeight);
 });
 
 // when all molecules are liked or disliked, send message to openai server
@@ -375,16 +344,17 @@ watch(state.messages, () => {
     flex-direction: column;
     height: 100%;
     border: none;
-    padding-top: 10px;
-    overflow-y: auto;
+    padding-top: 5px;
+    padding-bottom: 25px;
     .button-to-return {
       box-sizing: border-box;
       display: flex;
       justify-content: center;
       align-items: center;
-      padding-bottom: 10px;
+      padding-bottom: 5px;
       border-bottom: 0.5px solid #ddd;
       button {
+        height: 30px;
         padding: 5px 10px;
         border-radius: 5px;
         background: #eee;
@@ -395,6 +365,8 @@ watch(state.messages, () => {
       }
     }
     .chat-history {
+      width: 100%;
+      height: 100%;
       flex: 1;
       overflow-y: auto;
       .message {
@@ -429,6 +401,15 @@ watch(state.messages, () => {
           overflow-wrap: break-word;
           .user-hint {
             width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: flex-start;
+            width: calc(100% - 46px);
+            background: #f8f8f8;
+            text-align: start;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
           }
           .bot-hint {
             width: 100%;
@@ -543,6 +524,13 @@ watch(state.messages, () => {
             }
           }
         }
+      }
+      .loading {
+        width: 100%;
+        height: 10px;
+        border-radius: 2px;
+        position: absolute;
+        bottom: 8px;
       }
     }
   }

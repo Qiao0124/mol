@@ -409,7 +409,7 @@ export async function reqSubmitMolPreference(
 
 export async function reqGetSdfsAiGenerated(
   timestamp: string
-): Promise<models.ChatRecommendationM> {
+): Promise<models.MoleculeM[]> {
   const params = {
     timestamp: timestamp,
   };
@@ -435,21 +435,7 @@ export async function reqGetSdfsAiGenerated(
     };
     molecules.push(molecule);
   });
-  return {
-    id: 1,
-    replyId: 1,
-    isUser: false,
-    isAiGenerated: true,
-    isAiGenerating: false,
-    canSubmit: true,
-    canScoreAiEffect: true,
-    score: 0,
-    context: [],
-    readyToCheck: false,
-    molecules: molecules,
-    likedMolecules: [],
-    dislikedMolecules: [],
-  };
+  return molecules;
 }
 
 export async function reqScoreEffect(score: number, timestamp: string) {
@@ -458,7 +444,7 @@ export async function reqScoreEffect(score: number, timestamp: string) {
     timestamp: timestamp,
   };
   await requests({
-    url: `api/feedback`,
+    url: `api/feedback/`,
     method: "post",
     data: params,
   });

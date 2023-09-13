@@ -7,10 +7,11 @@
           class="m-2"
           placeholder="Select"
           size="large"
+          value-key="name"
         >
           <el-option
-            v-for="(pdb, index) in state.pdbs"
-            :key="index"
+            v-for="pdb in state.pdbs"
+            :key="pdb.name"
             :label="pdb.name"
             :value="pdb"
           />

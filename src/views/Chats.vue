@@ -14,10 +14,17 @@
       />
     </div>
     <div class="main-left recommendations" v-else-if="!state.inFormal.showing">
-      <RecommendationList
-        @click-to-select="selectMolecule"
-        @click-to-preview="previewMolecule"
-      />
+      <el-tabs v-model="state.activeTab" class="demo-tabs" :stretch="true">
+        <el-tab-pane label="Preference submit" name="preference">
+          <RecommendationList
+            @click-to-select="selectMolecule"
+            @click-to-preview="previewMolecule"
+          />
+        </el-tab-pane>
+        <el-tab-pane label="Evaluate" name="evaluate">
+          <Evaluate @preview="previewMolecule"/>
+        </el-tab-pane>
+      </el-tabs>
     </div>
     <div class="main-left chat-area" v-else>
       <dialog-box
@@ -69,6 +76,7 @@ import { ref, onMounted, watch, reactive, computed, nextTick } from "vue";
 import { MoleculeM, ChatRecommendationM, Metrics } from "@/models";
 import DialogBox from "@/components/DialogBox.vue";
 import ChatsHistory from "@/components/ChatsHistory.vue";
+import Evaluate from "@/components/Evaluate.vue";
 
 interface stateM {
   inPreview: {
@@ -85,6 +93,7 @@ interface stateM {
   inPdbSelect: {
     showing: boolean;
   };
+  activeTab: string;
 }
 
 const state: stateM = reactive({
@@ -102,6 +111,7 @@ const state: stateM = reactive({
   inPdbSelect: {
     showing: true,
   },
+  activeTab: "preference",
 });
 
 const selectPdb = (mol: MoleculeM) => {
@@ -154,11 +164,14 @@ const currentFormalUrl = computed(() => {
 });
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 ._chats {
   display: flex;
   width: 100%;
   height: 100%;
+  .el-tabs__header {
+    margin: 0;
+  }
   .pdb-select-or-upload {
     position: absolute;
     width: 100%;
@@ -175,6 +188,15 @@ const currentFormalUrl = computed(() => {
     width: 900px;
     height: 100%;
     background-color: white;
+    .el-tabs {
+      height: 100%;
+    }
+    .el-tabs__content {
+      height: calc(100% - 40px);
+      .el-tab-pane {
+        height: 100%;
+      }
+    }
   }
   .main-right {
     width: calc(100% - 1092px);

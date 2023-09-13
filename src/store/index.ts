@@ -6,8 +6,8 @@ export const useMolStore = defineStore("molStore", {
   state: () => {
     return {
       viewer: null,
-      molStack: [],
       pdbId: "00",
+      checkPrompt: false,
       timestamp: "000000",
       csrfToken: "AAAXXX",
       initialRecommendation: {} as model.ChatRecommendationM,
@@ -44,6 +44,12 @@ export const useMolStore = defineStore("molStore", {
     },
     getInitialRecommendation(): model.ChatRecommendationM {
       return this.initialRecommendation;
+    },
+    setCheckPrompt(checkPrompt: boolean){
+      this.checkPrompt = checkPrompt;
+    },
+    getCheckPrompt() {
+      return this.checkPrompt;
     },
   },
 });
