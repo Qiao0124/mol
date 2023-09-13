@@ -1,6 +1,4 @@
-# medicine_demo
-
-## 环境 ：Node.js，Chrome
+# 环境 ：Node.js，Chrome
 
 ## 技术栈
 ```
