@@ -96,6 +96,7 @@ const resetView = () => {
 
 const scoreAiEffects = async (score: number) => {
   state.canScore = false;
+  state.score = 0;
   await api.reqScoreEffect(score, molStore.getTimestamp());
   state.fetchFinish = false;
   state.scoreFinish = true;
