@@ -38,13 +38,13 @@ const state = reactive({
 function getMaximum(label: string) {
   switch (label) {
     case "num_atoms":
-      return (Math.floor(state.statistics.num_atoms / 50) + 1) * 50;
+      return (Math.floor(state.statistics.NumAtoms / 50) + 1) * 50;
     case "num_bonds":
-      return (Math.floor(state.statistics.num_bonds / 50) + 1) * 50;
+      return (Math.floor(state.statistics.NumBonds / 50) + 1) * 50;
     case "num_rings":
-      return (Math.floor(state.statistics.num_rings / 50) + 1) * 50;
+      return (Math.floor(state.statistics.NumRings / 50) + 1) * 50;
     case "num_benzene_rings":
-      return (Math.floor(state.statistics.num_benzene_rings / 50) + 1) * 50;
+      return (Math.floor(state.statistics.NumBenzeneRings / 50) + 1) * 50;
     case "QED":
       return 1;
     case "SA":
