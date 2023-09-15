@@ -1,5 +1,5 @@
 <template>
-  <div class="_pdb-seletc-or-upload">
+  <div class="_pdb-seletc-or-upload" v-loading="!state.ready">
     <div class="inner-window">
       <div class="pdb-selections">
         <el-select
@@ -17,30 +17,30 @@
           />
         </el-select>
       </div>
-      <div class="pdb-upload">
-        or you can upload a pdb file
-        <input type="file" @change="getFile($event)" accept=".pdb" />
-      </div>
-      <div class="btns">
-        <div class="select-confirm">
-          <button
-            @click.once="selectPdb"
-            v-loading="state.pending"
-            :disabled="!state.pdbSelected"
-          >
-            select
-          </button>
+      <FadeTransition>
+        <div class="pdb-upload" v-if="!state.pending">
+          or you can upload a pdb file
+          <input type="file" @change="getFile($event)" accept=".pdb" />
         </div>
-        <div class="upload-confirm">
-          <button
-            @click.once="uploadPdb"
-            v-loading="state.pending"
-            :disabled="!state.pdbUploaded || true"
-          >
-            upload
-          </button>
+      </FadeTransition>
+      <FadeTransition>
+        <div class="btns" v-if="!state.pending">
+          <div class="select-confirm">
+            <button @click.once="selectPdb" :disabled="!state.pdbSelected">
+              select
+            </button>
+          </div>
+          <div class="upload-confirm">
+            <button
+              @click.once="uploadPdb"
+              :disabled="!state.pdbUploaded || true"
+            >
+              upload
+            </button>
+          </div>
         </div>
-      </div>
+        <Progress :finish="state.finish" v-else />
+      </FadeTransition>
     </div>
   </div>
 </template>
@@ -51,22 +51,28 @@ import * as api from "@/api";
 import { MoleculeM } from "@/models";
 import { useMolStore } from "@/store";
 import { storeToRefs } from "pinia";
+import Progress from "@/components/Progress.vue";
+import FadeTransition from "@/components/FadeTransition.vue";
 
 const molStore = useMolStore();
-const emits = defineEmits(["pdb-uploaded", "pdb-selected"]);
+const emits = defineEmits(["pdb-uploaded", "pdb-selected", "sdfs-got"]);
 
 interface stateM {
+  ready: boolean;
   pdbs: MoleculeM[];
   pdbSelected: MoleculeM | null;
   pdbUploaded: any;
   pending: boolean;
+  finish: boolean;
 }
 
 const state: stateM = reactive({
+  ready: false,
   pdbs: [],
   pdbSelected: null,
   pdbUploaded: null,
   pending: false,
+  finish: false,
 });
 
 const getFile = (event) => {
@@ -88,6 +94,7 @@ const getFile = (event) => {
 
 const selectPdb = async () => {
   state.pending = true;
+  emits("pdb-selected", state.pdbSelected);
   molStore.setCurrentPdbAndTimestamp(
     state.pdbSelected?.name as string,
     Date.now().toString()
@@ -97,8 +104,11 @@ const selectPdb = async () => {
     molStore.getTimestamp(),
     molStore.getCurrentPdbId()
   );
-  state.pending = false;
-  emits("pdb-selected", state.pdbSelected);
+  state.finish = true;
+  setTimeout(() => {
+    emits("sdfs-got");
+    state.pending = false;
+  }, 600);
 };
 
 const uploadPdb = () => {
@@ -112,6 +122,7 @@ const uploadPdb = () => {
 onMounted(async () => {
   const pdbs = await api.reqGetPdbs();
   state.pdbs = pdbs;
+  state.ready = true;
 });
 </script>
 

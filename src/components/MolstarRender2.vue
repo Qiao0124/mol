@@ -17,11 +17,7 @@ const props = defineProps({
   url: {
     type: String,
     default: "http://localhost:8080/examples/add_0/before_add_0.sdf",
-  },
-  smiles: {
-    type: String,
-    default: "C1=CC=C(C=C1)C(=O)O",
-  },
+  }
 });
 
 const examplePdbUrl =

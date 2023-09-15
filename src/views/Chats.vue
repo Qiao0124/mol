@@ -9,8 +9,9 @@
       v-if="state.inPdbSelect.showing"
     >
       <PdbSeletcOrUpload
-        @pdb-selected="selectPdb"
+        @pdb-selected="renderPdb"
         @pdb-uploaded="uploadPdb"
+        @sdfs-got="exitPdbSelectAndEnterPreferenceSubmitPage"
       />
     </div>
     <div class="main-left recommendations" v-else-if="!state.inFormal.showing">
@@ -34,11 +35,10 @@
       />
     </div>
     <div class="main-right render-area">
-      <div class="pre-view render-view" v-if="state.inPreview.showing">
+      <div class="pre-view render-view" v-if="state.showingPdb.showing">
         <div class="renderer">
           <MolstarRender2
-          :url="state.inPreview.previewMolecule.url"
-          :smiles="state.inPreview.previewMolecule.smiles"
+          :url="state.showingPdb.pdb.url"
           @click-rerender-pdb="rerenderPdb"
         />
         </div>
@@ -48,7 +48,7 @@
           />
         </div>
       </div>
-      <div class="formal-view render-view" v-else-if="state.inFormal.showing">
+      <!-- <div class="formal-view render-view" v-else-if="state.inFormal.showing">
         <MolstarRender
           :url="currentFormalUrl"
           :smiles="state.inPreview.previewMolecule.smiles"
@@ -58,7 +58,7 @@
           :statistics="(state.inFormal.formalMolecule.statisticsIndexs as Metrics)"
           />
         </div>
-      </div>
+      </div> -->
       <div class="tint" v-else>
         Here will render the molecular structure based on Molar...
       </div>
@@ -93,6 +93,10 @@ interface stateM {
   inPdbSelect: {
     showing: boolean;
   };
+  showingPdb: {
+    pdb: MoleculeM;
+    showing: boolean;
+  };
   activeTab: string;
 }
 
@@ -111,15 +115,24 @@ const state: stateM = reactive({
   inPdbSelect: {
     showing: true,
   },
+  showingPdb: {
+    pdb: {} as MoleculeM,
+    showing: false,
+  },
   activeTab: "preference",
 });
 
-const selectPdb = (mol: MoleculeM) => {
-  state.inPdbSelect.showing = false;
-  state.inFormal.showing = false;
+const renderPdb = (mol: MoleculeM) => {
   state.inPreview.previewMolecule = mol;
   state.inPreview.previewPdb = mol;
   state.inPreview.currentPdbUrl = mol.url;
+  state.showingPdb.pdb = mol;
+  state.showingPdb.showing = true;
+};
+
+const exitPdbSelectAndEnterPreferenceSubmitPage = (mol: MoleculeM) => {
+  state.inPdbSelect.showing = false;
+  state.inFormal.showing = false;
   state.inPreview.showing = true;
 };
 
