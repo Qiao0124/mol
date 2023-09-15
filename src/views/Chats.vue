@@ -38,7 +38,7 @@
       <div class="pre-view render-view" v-if="state.showingPdb.showing">
         <div class="renderer">
           <MolstarRender2
-          :url="state.showingPdb.pdb.url"
+          :url="state.inPreview.previewMolecule.url"
           @click-rerender-pdb="rerenderPdb"
         />
         </div>
