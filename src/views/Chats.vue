@@ -137,10 +137,10 @@ const exitPdbSelectAndEnterPreferenceSubmitPage = (mol: MoleculeM) => {
 };
 
 const rerenderPdb = async () => {
-  state.inPreview.showing = false;
+  state.showingPdb.showing = false;
   await nextTick();
   state.inPreview.previewMolecule = state.inPreview.previewPdb;
-  state.inPreview.showing = true;
+  state.showingPdb.showing = true;
 };
 
 const uploadPdb = (molecule: MoleculeM) => {
