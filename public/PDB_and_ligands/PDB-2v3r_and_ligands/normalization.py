@@ -5,7 +5,6 @@ def modify_json_file(file_path):
     with open(file_path, 'r') as file:
         data = json.load(file)
 
-    # 修改键名和键值
     data["Vina"] = data.pop("Vina score")
     data["num_atoms"] = data.pop("Atoms Num")
     data["num_bonds"] = data.pop("Bonds Num")
@@ -21,7 +20,7 @@ def batch_modify_json_files(folder_path):
             file_path = os.path.join(folder_path, filename)
             modify_json_file(file_path)
 
-# 将下面这行替换为你存放 JSON 文件的文件夹路径
+# Replace the following line with the path to the folder where you store the JSON file
 folder_path = './'
 
 batch_modify_json_files(folder_path)

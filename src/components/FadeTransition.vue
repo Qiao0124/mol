@@ -1,8 +1,6 @@
 <template>
-  <!-- 包装内置的 Transition 组件 -->
   <Transition appear mode="out-in">
     <slot></slot>
-    <!-- 向内传递插槽内容 -->
   </Transition>
 </template>
 

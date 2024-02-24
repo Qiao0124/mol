@@ -81,7 +81,7 @@ import Evaluate from "@/components/Evaluate.vue";
 interface stateM {
   inPreview: {
     showing: boolean;
-    previewMolecule: MoleculeM; // pdb 或 sdf
+    previewMolecule: MoleculeM; // pdb or sdf
     previewPdb: MoleculeM; // pdb
     currentPdbUrl: string;
   };
