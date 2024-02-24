@@ -1,5 +1,4 @@
 import axios from "axios";
-import * as CONF from "@/openai-conf";
 import requests from "./request";
 import { AxiosPromise } from "axios";
 import * as models from "@/models";
