@@ -8,17 +8,17 @@ module.exports = defineConfig({
   devServer: {
     proxy: {
       "/api": {
-        target: "http://118.193.102.41:8000",
+        target: "http://localhost:8000",
         ws: true,
         changeOrigin: true,
       },
       "/static": {
-        target: "http://118.193.102.41:8000",
+        target: "http://localhost:8000",
         ws: true,
         changeOrigin: true,
       },
       "/full_pdb": {
-        target: "http://118.193.102.41:8000/static",
+        target: "http://localhost:8000/static",
         ws: true,
         changeOrigin: true,
       },
